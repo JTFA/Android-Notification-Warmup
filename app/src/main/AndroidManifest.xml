@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- 前台服务：锁屏点亮等触发点依赖常驻进程，服务没起来锁屏触发会完全失效 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- 前台服务通知（Android 13+ 必须声明，否则通知被系统拦截） -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- 开机拉起监听服务 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- 申请加入电池优化白名单（Play 政策限制，本应用仅侧载分发） -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!--
+        枚举应用 + 预热都需要：跨应用解析 ContentProvider 受包可见性限制，
+        没有这条权限就取不到目标应用的 provider 引用，预热会直接失败。
+    -->
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+    <!--
+        写入安全设置（0.7.20-M6 / 41）：开机广播进来时由本应用自己把无障碍服务写回系统设置
+        （部分 ROM 重启后会关掉第三方无障碍服务）。它的保护级别是
+        signature|privileged|development，declaring 本身不给权限，只能由 shell / root 授：
+
+            adb shell pm grant com.jtfa.notificationfixer android.permission.WRITE_SECURE_SETTINGS
+
+        但「不声明」的话 shell 也授不进来，所以这条必须留在清单里（tools:ignore 只是让 lint
+        别为「申请了受保护权限」报警，本应用只做侧载分发）。
+    -->
+    <uses-permission
+        android:name="android.permission.WRITE_SECURE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+
+    <application
+        android:name=".App"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.NotificationFixer">
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 常驻监听服务：动态注册屏幕广播的宿主 -->
+        <service
+            android:name=".service.KeepAliveService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="notification_prewarm_listener" />
+        </service>
+
+        <!-- 通知使用权：横幅通知与锁屏可见通知的判定来源 -->
+        <service
+            android:name=".detect.NotificationAccessService"
+            android:exported="true"
+            android:label="@string/service_notification_listener_label"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <!-- 无障碍：通知面板展开与锁屏判定 -->
+        <service
+            android:name=".detect.ShadeAccessibilityService"
+            android:exported="true"
+            android:label="@string/service_accessibility_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
+
+        <receiver
+            android:name=".service.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!--
+            M4 特权路径：Shizuku 服务端以 shell（adb 模式）或 root 身份，在本应用进程启动时
+            通过这个 provider 把 binder 送进来（授权也走这条路）。
+            authority 必须是「本应用包名 + .shizuku」；multiprocess=false 与 exported=true
+            是 ShizukuProvider 自己断言的两条，写错会直接崩在启动路径上。
+
+            android:permission 必须填一个「shell 持有、普通应用没有」的权限（ShizukuProvider
+            的类注释原文就是这么写的）：真正来调用的是以 shell 身份运行的 Shizuku 服务端。
+            填成 Shizuku 应用自己的权限（例如 moe.shizuku.manager.permission.API_V23）
+            会把服务端挡在 provider 外 —— binder 永远送不进来，现象就是
+            「Shizuku 应用里明明已授权，本应用 pingBinder() 却一直是 false」。
+        -->
+        <provider
+            android:name="rikka.shizuku.ShizukuProvider"
+            android:authorities="${applicationId}.shizuku"
+            android:enabled="true"
+            android:exported="true"
+            android:multiprocess="false"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
+
+        <!-- 特权自检的两个靶子：故意 exported="false"，用来测 shell / root 能不能绕过导出检查 -->
+        <receiver
+            android:name=".privileged.SelfCheckReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <service
+            android:name=".privileged.SelfCheckService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- 自检 ③ 的靶子：会被 pm disable / pm enable 真的改一次状态（见该类注释） -->
+        <receiver
+            android:name=".privileged.SelfCheckStateProbe"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- 日志导出分享 -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+
+</manifest>

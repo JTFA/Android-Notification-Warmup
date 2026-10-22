@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  「锁屏触发高级设置」弹窗（0.7.38-M6 / 59）。
+
+  两块，中间一条分割线：① 锁屏普通通知宽松判定（开关）；② 实时通知（流体云）预热（开关 + 三档
+  「判定范围」）。即改即生效 —— 这里没有「确定」，点「关闭」只是把弹窗关掉。
+
+  三档用 Material Slider（0 / 1 / 2 三档，刻度可见、不弹数字气泡），下面三个标签里选中的那个用主色
+  （代码里刷）；开关关掉时整块隐藏。
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="8dp">
+
+        <!-- ① 锁屏普通通知宽松判定 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_lockscreen_loose_title"
+                    android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/settings_lockscreen_loose_desc"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+            </LinearLayout>
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/dlg_sw_lockscreen_loose"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:contentDescription="@string/settings_lockscreen_loose_title" />
+        </LinearLayout>
+
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- ② 实时通知（流体云）预热 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_live_warm_title"
+                    android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/settings_live_warm_desc"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+            </LinearLayout>
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/dlg_sw_live_warm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:contentDescription="@string/settings_live_warm_title" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/dlg_ll_live_range"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_live_range_label"
+                android:textAppearance="?attr/textAppearanceLabelLarge" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/dlg_slider_live_range"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:stepSize="1"
+                android:value="1"
+                android:valueFrom="0"
+                android:valueTo="2"
+                app:labelBehavior="gone"
+                app:tickVisible="true" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/dlg_tv_live_strict"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/settings_live_range_strict"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                <TextView
+                    android:id="@+id/dlg_tv_live_normal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/settings_live_range_normal"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                <TextView
+                    android:id="@+id/dlg_tv_live_wide"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/settings_live_range_wide"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/settings_live_range_desc"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

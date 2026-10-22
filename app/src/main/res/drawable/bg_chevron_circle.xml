@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  「预热参数」右端那枚圆圈（0.7.39-M6 / 60）：32dp 正圆、1.5dp 描边，
+  与同一张卡里 MaterialSwitch 的高度一致；描边颜色跟里面的箭头一起走 colorOnSurfaceVariant。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@android:color/transparent" />
+    <stroke
+        android:width="1.5dp"
+        android:color="?attr/colorOnSurfaceVariant" />
+</shape>

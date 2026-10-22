@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+ 备份规则：日志只留在本机，不进云备份也不随换机迁移 -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude
+            domain="file"
+            path="logs/" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude
+            domain="file"
+            path="logs/" />
+    </device-transfer>
+</data-extraction-rules>

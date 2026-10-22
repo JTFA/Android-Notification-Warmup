@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#FF1B4B7A</color>
+
+    <!-- 日志分类色：在浅色与深色主题下都可读 -->
+    <color name="cat_trigger">#FFFF9800</color>
+    <color name="cat_warm">#FF26C6DA</color>
+    <color name="cat_notification">#FF4CAF50</color>
+    <color name="cat_diag">#FFBA68C8</color>
+    <color name="cat_service">#FF42A5F5</color>
+    <color name="cat_permission">#FFFFD54F</color>
+
+    <!-- 状态色：不依赖主题属性，浅色/深色下都可用 -->
+    <color name="state_ok">#FF4CAF50</color>
+    <color name="state_warn">#FFFFB300</color>
+    <color name="state_bad">#FFEF5350</color>
+    <color name="state_neutral">#FF9E9E9E</color>
+
+    <!--
+      名单页行内标签的底与字（0.7.11-M6 / 32）。深色主题下换一套，见 values-night/colors.xml。
+      结论那枚只用这两种色，判据是「这条路能不能拉起它」（WarmTarget.isAvailable），
+      与勾没勾选无关 —— 勾选是勾选框与置顶、底色那几件事。
+    -->
+    <color name="chip_ok_bg">#FFE3F3E4</color>
+    <color name="chip_ok_text">#FF1B5E20</color>
+    <color name="chip_bad_bg">#FFFBE4E2</color>
+    <color name="chip_bad_text">#FFB3261E</color>
+
+    <!-- 勾选过的行整行加的底色（它们同时已经被排到列表最前面） -->
+    <color name="row_selected_bg">#FFECF1F8</color>
+
+    <!-- 行与行之间的分隔线（0.7.12-M6 / 33）。对齐 M3 的 outlineVariant，深色下另有一套 -->
+    <color name="row_divider">#FFCAC4D0</color>
+
+    <!--
+      状态页里那些「块」的底色（0.7.29-M6 / 50）。对齐 M3 的 surfaceContainerHighest：
+      它嵌在卡片（surfaceContainerLow）里，明度差正好够看出「卡里的一格」，深色下另有一套。
+    -->
+    <color name="block_bg">#FFE6E0E9</color>
+</resources>

@@ -1,0 +1,22 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build/
+/app/build/
+# AGP 9 的 release 产物目录
+/app/release/
+/captures/
+.externalNativeBuild
+.cxx/
+*.apk
+*.aab
+*.hprof
+
+# 本地签名材料，绝不入库
+/key
+*.jks
+*.keystore
+*.p12
+*.pfx

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        系统栏外观（0.7.17-M6 / 38）。
+
+        深色主题的那一份在 values-night/themes.xml，两处必须成对改 —— 样式资源不跨配置合并，
+        夜间那份要原样再写一遍。
+
+        windowLight*Bar：系统栏图标用深色还是浅色。Material3 的 DayNight 主题自己不设这两项，
+        默认 false = 永远是浅色图标，于是浅色主题下就是「白字白底」。浅色主题要深色图标（true），
+        深色主题（values-night）才用浅色图标（false）。
+
+        enforce*Contrast：系统栏背景由本应用自己画（窗口背景 = ?attr/colorSurface，顶栏与底栏
+        也是同一个色，整屏一色）。留 false 让系统别再叠它那层对比度蒙层 —— 安卓 15 起三键导航默认
+        就垫一层 80% 不透明的底，手势模式与状态栏那两处也是同一种蒙层，「底部不沉浸」就是它。
+
+        代码里 SystemBars 还会按当前 uiMode 再设一次图标明暗（启动窗口那几帧只有主题值可用），
+        两处取值必须一致。
+    -->
+    <style name="Theme.NotificationFixer" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">?attr/colorSurface</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+    </style>
+</resources>

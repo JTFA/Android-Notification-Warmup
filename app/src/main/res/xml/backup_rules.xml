@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12 之前（fullBackupContent）：日志不参与备份 -->
+<full-backup-content>
+    <exclude
+        domain="file"
+        path="logs/" />
+</full-backup-content>

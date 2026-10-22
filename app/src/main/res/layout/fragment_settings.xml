@@ -1,0 +1,601 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    tools:ignore="TooManyViews">
+    <!--
+        这一页是纵向滚动的设置页，0.7.19-M6 / 40 起控件数过了 80 个，于是 lint 报了 TooManyViews。
+        那条检查针对的是会被反复 inflate 的布局（列表行），这里一次 inflate、并且本来就要滚，
+        所以显式忽略（0 errors，警告仍是原来那 5 条）。
+    -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="24dp">
+
+        <!--
+            预热设置（0.7.39-M6 / 60）：分组标题 + 一张卡，卡里两行。
+            第一行 = 启用预热（大字 + 随开关换说法的小字），开关对这一整列居中；
+            第二行 = 预热参数（大字 + 三个值的读数），最右一枚圆圈里的箭头，整行可点、点开弹窗。
+        -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:text="@string/settings_warm_module"
+            android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_warm_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/settings_warm_enabled"
+                            android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                        <TextView
+                            android:id="@+id/tv_warm_state"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            tools:text="当前仅会预热名单设置的应用" />
+                    </LinearLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/sw_warm"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:contentDescription="@string/settings_warm_enabled" />
+                </LinearLayout>
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp" />
+
+                <LinearLayout
+                    android:id="@+id/row_warm_params"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/settings_warm_params_title"
+                            android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                        <TextView
+                            android:id="@+id/tv_warm_params"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            tools:text="单次预热数量上限-3个•同应用冷却时间-60秒•串行间隔-120毫秒" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/iv_warm_params_more"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginStart="12dp"
+                        android:background="@drawable/bg_chevron_circle"
+                        android:contentDescription="@string/settings_warm_params_title"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="?attr/colorOnSurfaceVariant" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:text="@string/settings_trigger_section"
+            android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <!--
+                    三个触发点（0.7.38-M6 / 59）：一行 = 左边「大字 + 小字」，右边开关，开关对着这两行居中；
+                    小字里写着这一条的现状（横幅 / 锁屏两行把档位直接写在行里），一行放不下由它自己换行。
+                    横幅与锁屏两行在小字右侧带「高级设置＞」，点开是弹窗。
+                -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/settings_trigger_banner"
+                            android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/tv_banner_summary"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textAppearance="?attr/textAppearanceBodySmall"
+                                android:textColor="?attr/colorOnSurfaceVariant"
+                                tools:text="宽松判定-关•输入时一律拉起activity" />
+
+                            <TextView
+                                android:id="@+id/tv_banner_advanced"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:padding="4dp"
+                                android:text="@string/settings_trigger_advanced"
+                                android:textAppearance="?attr/textAppearanceBodySmall"
+                                android:textColor="?attr/colorPrimary" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/sw_banner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:contentDescription="@string/settings_trigger_banner" />
+                </LinearLayout>
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/settings_trigger_shade"
+                            android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/settings_trigger_shade_desc"
+                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:textColor="?attr/colorOnSurfaceVariant" />
+                    </LinearLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/sw_shade"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:contentDescription="@string/settings_trigger_shade" />
+                </LinearLayout>
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/settings_trigger_lockscreen"
+                            android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/tv_lockscreen_summary"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textAppearance="?attr/textAppearanceBodySmall"
+                                android:textColor="?attr/colorOnSurfaceVariant"
+                                tools:text="宽松判定-开•实时通知预热-中等" />
+
+                            <TextView
+                                android:id="@+id/tv_lockscreen_advanced"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:padding="4dp"
+                                android:text="@string/settings_trigger_advanced"
+                                android:textAppearance="?attr/textAppearanceBodySmall"
+                                android:textColor="?attr/colorPrimary" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/sw_lockscreen"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:contentDescription="@string/settings_trigger_lockscreen" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!--
+            特权增强（0.7.40-M6 / 61）：从下面搬上来，紧跟「触发场景」。
+            第一行是 Shizuku 状态（保持原来的 statusText 说法），右边两枚按钮竖排；
+            下面一条分割线 + 一枚「进程已在跑就不预热」的开关。探活本身不再有开关：
+            有特权通道就做，没有就整段跳过。
+        -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:text="@string/settings_privileged_section"
+            android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_privileged_status"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/settings_privileged_checking"
+                            android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                        <TextView
+                            android:id="@+id/tv_privileged_desc"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:text="@string/settings_privileged_desc"
+                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:textColor="?attr/colorOnSurfaceVariant" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:gravity="end"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_privileged_refresh"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="0dp"
+                            android:text="@string/action_privileged_refresh" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_privileged_grant"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:minWidth="0dp"
+                            android:text="@string/action_privileged_grant" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/settings_skip_running"
+                        android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/sw_running_no_warm"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:contentDescription="@string/settings_skip_running" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!--
+            其他设置（0.7.46-M6 / 67）：把原来的「开机自启」「通知」「本应用」三张卡合并成一张。
+            顺序按用户定：在最近任务中隐藏 → 开机自启 → 服务异常通知。
+            说明性小字全部撤掉，只留「无障碍服务开机自启…」这一句（授予权限按钮放在它右侧）。
+        -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:text="@string/settings_other_section"
+            android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/sw_hide_recents"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_hide_recents" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/sw_boot_autostart"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_boot_autostart" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:baselineAligned="false"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tv_accessibility_desc"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/settings_accessibility_desc"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_accessibility_grant"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:minWidth="0dp"
+                        android:text="@string/action_accessibility_grant" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_accessibility_state"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurface" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_notify_watch_title"
+                    android:textAppearance="?attr/textAppearanceTitleSmall" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/sw_watch_listener"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_notify_watch_listener" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/sw_watch_accessibility"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_notify_watch_accessibility" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/sw_watch_service"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_notify_watch_service" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/sw_watch_privileged"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_notify_watch_privileged" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!--
+            实验功能（0.7.46-M6 / 67）：原「预热」卡，留下 windowingMode。
+            0.7.61-M6 / 82 起「尝试后台启动activity」改成名单内逐应用设置，见 dialog_app_settings.xml。
+            特权通道（am start）与「拉起 Activity」整段说明已撤掉。
+        -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:text="@string/settings_experimental_section"
+            android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/sw_activity_windowing"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_activity_windowing" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_activity_windowing_desc"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_activity_windowing"
+                    style="?attr/textInputOutlinedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:enabled="false"
+                    android:hint="@string/settings_activity_windowing_hint">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_activity_windowing"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:imeOptions="actionDone"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:singleLine="true" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</ScrollView>

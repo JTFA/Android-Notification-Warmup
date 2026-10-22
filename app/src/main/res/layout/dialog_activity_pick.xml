@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  某个应用「唤醒 Activity」的候选列表（名单页 → 应用设置 → 选 Activity…）。
+
+  一行一个**已导出**的 Activity：选中它（点行），或用「正常打开」/「尝试后台打开」
+  当场启动它，自己看有没有界面。
+  列表高度在代码里按条数算，最多半屏 —— 一个应用可能有上百个导出 Activity。
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="24dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="8dp">
+
+    <TextView
+        android:id="@+id/tv_pick_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textColor="?attr/colorOnSurfaceVariant" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_candidates"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:clipToPadding="false"
+        android:scrollbars="vertical" />
+
+    <TextView
+        android:id="@+id/tv_pick_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/applist_activity_empty"
+        android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:visibility="gone" />
+
+</LinearLayout>

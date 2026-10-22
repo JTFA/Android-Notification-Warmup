@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  「预热参数」弹窗（0.7.39-M6 / 60）。
+
+  三项，项与项之间一条分割线：单次预热数量上限（下拉框）、同应用冷却时间（秒）、
+  串行间隔（毫秒）。每一行都是「左边一列：大字 + 小字；右侧：控件」—— 控件对整列居中，
+  不是单独占一行。两个数字框与下拉框同一种盒子（textInputOutlinedStyle、关掉浮动标签、
+  固定 112dp），下拉框右端是 Material 自带的倒三角。
+
+  即改即生效：这里没有「确定」，底栏左边「清除冷却记录」、右边「关闭」（代码里接）。
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="12dp">
+
+        <!-- ① 单次预热数量上限 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_warm_max_title"
+                    android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/settings_warm_max_helper"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+            </LinearLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/dlg_til_warm_max"
+                style="?attr/textInputOutlinedStyle"
+                android:layout_width="112dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                app:endIconMode="dropdown_menu"
+                app:hintEnabled="false">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/dlg_et_warm_max"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:cursorVisible="false"
+                    android:gravity="start|center_vertical"
+                    android:inputType="none"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- ② 同应用冷却时间 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_warm_cooldown_hint"
+                    android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/settings_warm_cooldown_helper"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+            </LinearLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/dlg_til_warm_cooldown"
+                style="?attr/textInputOutlinedStyle"
+                android:layout_width="112dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                app:hintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/dlg_et_warm_cooldown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="end|center_vertical"
+                    android:imeOptions="actionDone"
+                    android:inputType="number"
+                    android:maxLength="4"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- ③ 串行间隔 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_warm_gap_hint"
+                    android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/settings_warm_gap_helper"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+            </LinearLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/dlg_til_warm_gap"
+                style="?attr/textInputOutlinedStyle"
+                android:layout_width="112dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                app:hintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/dlg_et_warm_gap"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="end|center_vertical"
+                    android:imeOptions="actionDone"
+                    android:inputType="number"
+                    android:maxLength="5"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <!-- 底栏：左边清除冷却记录，右边关闭 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_clear_cooldown"
+                style="?attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/action_clear_cooldown" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_warm_params_close"
+                style="?attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_close" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

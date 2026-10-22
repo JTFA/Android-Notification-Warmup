@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  深色主题下要换掉的颜色（0.7.11-M6 / 32）。
+
+  主题是 Theme.Material3.DayNight，所以名单页行里那两枚标签会有深色底可看：
+  浅绿 / 浅红直接拿过来用会在深色上刺眼，所以这里换成半透明的同色系 + 亮一档的文字色。
+  只列需要换的名字，其余颜色继续用 values/colors.xml 里那份。
+-->
+<resources>
+    <color name="chip_ok_bg">#3322C55E</color>
+    <color name="chip_ok_text">#FF8FE5A8</color>
+    <color name="chip_bad_bg">#33EF5350</color>
+    <color name="chip_bad_text">#FFFFA9A5</color>
+    <color name="row_selected_bg">#FF23272E</color>
+    <color name="row_divider">#FF49454F</color>
+    <color name="block_bg">#FF36343B</color>
+</resources>

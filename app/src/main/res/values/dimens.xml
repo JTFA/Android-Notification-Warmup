@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        AppCompat / Material RadioButton 的圆钮绘制区固有宽度是 32dp。
+        设置弹窗里凡是需要和单选文字左缘对齐的控件，都缩进这一段。
+    -->
+    <dimen name="app_settings_radio_text_inset">32dp</dimen>
+</resources>

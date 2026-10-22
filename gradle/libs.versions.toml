@@ -1,0 +1,16 @@
+[versions]
+agp = "9.2.1"
+appcompat = "1.6.1"
+material = "1.10.0"
+recyclerview = "1.1.0"
+shizuku = "13.1.5"
+
+[libraries]
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+shizuku-api = { group = "dev.rikka.shizuku", name = "api", version.ref = "shizuku" }
+shizuku-provider = { group = "dev.rikka.shizuku", name = "provider", version.ref = "shizuku" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }

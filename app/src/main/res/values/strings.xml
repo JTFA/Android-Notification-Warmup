@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">通知预热</string>
+
+    <!-- 首次安装声明 -->
+    <string name="disclaimer_title">声明</string>
+    <string name="disclaimer_message">本应用开发初衷是解决ColorOS中点开通知时过渡动画缺失问题，通过无障碍监控下拉通知面板、锁屏点亮、收到横幅通知场景，并预先唤醒发通知的应用的后台进程， 以避免点开通知时因进程冷启动而卡顿。使用本应用可能会导致耗电增加。</string>
+    <string name="disclaimer_disagree">不同意</string>
+    <string name="disclaimer_agree">同意</string>
+
+    <!-- 系统里显示的服务名 -->
+    <string name="service_notification_listener_label">通知预热 · 通知监听</string>
+    <string name="service_accessibility_label">通知预热 · 面板判定</string>
+
+    <string name="a11y_summary">用于判定「通知面板已展开」与「锁屏已点亮」，本身不做任何点击或操作</string>
+    <string name="a11y_description">读取 com.android.systemui 的窗口结构，判断通知面板是否展开；不读取通知内容，不模拟点击，不联网。</string>
+
+    <!-- 前台服务通知 -->
+    <string name="keepalive_channel_name">监听服务</string>
+    <string name="keepalive_channel_desc">保持监听进程存活所需的常驻通知，可最小化显示</string>
+    <string name="keepalive_title">通知预热正在监听</string>
+    <string name="keepalive_text">用于在下拉面板 / 锁屏点亮 / 横幅通知时预热目标应用进程</string>
+    <string name="notify_channel_alert_name">监听提醒</string>
+    <string name="notify_channel_alert_desc">服务异常时的一条提醒，可以直接划掉</string>
+    <string name="notify_alert_title">通知预热：服务异常</string>
+    <string name="notify_alert_text">%1$s。点开本应用看详情；恢复正常后这条提醒会自己消失。</string>
+    <string name="notify_item_listener">通知监听未连接</string>
+    <string name="notify_item_listener_permission">通知使用权没有授予</string>
+    <string name="notify_item_accessibility">无障碍服务被关掉了</string>
+    <string name="notify_item_service">监听服务上次被系统杀掉了</string>
+    <string name="notify_item_privileged">特权通道（Shizuku）断开了</string>
+
+    <!-- 底部导航 -->
+    <string name="nav_status">状态</string>
+    <string name="nav_apps">名单</string>
+    <string name="nav_log">日志</string>
+    <string name="nav_settings">设置</string>
+
+    <!-- 名单页 -->
+    <string name="applist_blacklist_mode_switch">黑名单模式</string>
+    <string name="applist_selected_count_blacklist">已排除 %1$d 个</string>
+    <string name="applist_selected_count_whitelist">已选 %1$d 个</string>
+    <string name="applist_mode_hint_blacklist">预热所有未勾选应用</string>
+    <string name="applist_mode_hint_whitelist">仅预热勾选应用</string>
+    <string name="applist_search_hint">搜索应用名或包名</string>
+    <string name="applist_empty">没有匹配的应用</string>
+    <string name="applist_test">试一次</string>
+    <string name="applist_testing">预热中…</string>
+    <string name="applist_settings_button">设置</string>
+    <string name="applist_row_weight">权重：%1$s</string>
+    <string name="applist_row_method">唤醒方式：%1$s</string>
+    <string name="applist_wake_routes">唤醒后台</string>
+    <string name="applist_wake_activity">拉起 Activity</string>
+    <string name="applist_test_result_title">试一次预热</string>
+    <string name="applist_warm_ui_check_association">请检查本应用和目标应用是否已开启关联启动。</string>
+    <string name="applist_warm_ui_system_disabled_recover">目标应用已被系统停用，通常手动打开一次目标应用可以恢复。</string>
+    <string name="applist_engine_missing">预热引擎未启动，请重启应用</string>
+    <string name="applist_settings_title">%1$s 的设置</string>
+    <!-- 行里的包名最多两行、再长省略，所以全名放在这里（可选中复制，拿去跑 adb） -->
+    <string name="applist_settings_package">包名：%1$s</string>
+    <string name="applist_settings_close">关闭</string>
+    <string name="applist_settings_weight_section">预热权重</string>
+    <string name="applist_settings_weight_message">单次触发中权重高的应用优先预热</string>
+    <string name="applist_settings_activity_section">唤醒方式</string>
+    <string name="applist_method_routes">唤醒后台</string>
+    <string name="applist_method_routes_desc">通过关联启动方式唤醒目标应用后台，需要该应用有可导出的组件，并且本应用和目标应用均开启关联启动。\n部分系统在重启或目标应用长期未使用后会停用目标应用，导致本应用无法唤醒该应用后台，通常手动启动一次目标应用后可以恢复。</string>
+    <string name="applist_method_activity">拉起activity</string>
+    <string name="applist_method_activity_desc">通过打开目标应用的无窗口的activity来实现后台唤醒效果，不受关联启动开关和系统停用的目标应用的影响，但需要用户自行测试并选择打开后无副作用的目标应用activity。重要应用建议谨慎使用该功能</string>
+    <string name="applist_state_now_available">现在可预热：%1$s</string>
+    <string name="applist_state_now_unavailable">现在不可预热：%1$s</string>
+    <string name="applist_state_now_activity">现在可预热：%1$s：%2$s</string>
+    <string name="applist_state_now_activity_pick">现在可预热：请从下方选择一个activity</string>
+    <string name="applist_activity_chosen_by_user">已指定activity</string>
+    <string name="applist_activity_chosen_auto">自动选择activity</string>
+    <string name="applist_settings_activity_pick">选 Activity…</string>
+    <string name="applist_settings_activity_behind">尝试后台启动activity</string>
+    <string name="applist_settings_activity_behind_desc">若存在触发时弹出目标应用页面的情况，可尝试此功能，开启后即使目标应用activity有页面也会阻止页面弹出，但可能会导致最近任务中多出现目标任务的卡片</string>
+    <string name="applist_activity_title">%1$s 的 Activity 列表</string>
+    <!-- 中文没有单复数变化，PluralsCandidate 在这里是误报。 -->
+    <string name="applist_pick_hint" tools:ignore="PluralsCandidate">这个应用有%1$d个已导出的activity，主流应用大概率存在打开时不会弹出任何页面但具有拉起后台进程效果的activity，但本应用无法精准识别，已按优先【最像不会弹出窗口】的顺序进行排列，请点击“正常打开”尝试效果并选择不会打开窗口且没有副作用的activity。\n若没有找到符合要求的activity，可以点击“尝试后台打开”测试效果，该功能会尝试在阻止弹出页面的前提下打开activity，但可能会在最近任务中新增卡片。该功能为实验功能，不同机型表现可能不同，需要在应用设置中开启“尝试后台启动activity”才可在正式触发时使用。\n部分activity在无后台启动和有后台启动时表现可能不同，请多次尝试。</string>
+    <string name="applist_activity_use">用这个</string>
+    <string name="applist_activity_open">正常打开</string>
+    <string name="applist_activity_opening">正常打开中…</string>
+    <string name="applist_activity_open_behind">尝试后台打开</string>
+    <string name="applist_activity_opening_behind">尝试后台打开中…</string>
+    <string name="applist_activity_empty_title">没有可借的 Activity</string>
+    <string name="applist_activity_empty">这个应用一个导出的 Activity 都没有，拉起 Activity 这条路借不到东西（改回「唤醒后台」即可）。</string>
+    <string name="applist_open_result_title">单独试：%1$s</string>
+    <string name="applist_open_behind_result_title">后台试：%1$s</string>
+    <string name="applist_open_mode">本次打开方式：%1$s</string>
+    <string name="applist_activity_name">.%1$s</string>
+    <string name="applist_activity_copied">已复制完整组件名：%1$s</string>
+    <string name="applist_activity_copy_label">Activity 组件名</string>
+    <string-array name="applist_weight_names">
+        <item>普通</item>
+        <item>较高</item>
+        <item>最高</item>
+    </string-array>
+
+    <!-- 设置页：预热 -->
+    <string name="settings_warm_module">预热设置</string>
+    <string name="settings_other_section">其他设置</string>
+    <string name="settings_experimental_section">实验功能</string>
+    <string name="settings_warm_enabled">启用预热</string>
+    <!-- 「启用预热」下面那行小字（0.7.38-M6 / 59）：随开关换说法。 -->
+    <string name="settings_warm_state_on">当前仅会预热名单设置的应用</string>
+    <string name="settings_warm_state_off">当前仅记录日志，不预热任何应用</string>
+    <string name="settings_activity_windowing">尝试跳过打开第三方应用授权弹窗</string>
+    <string name="settings_activity_windowing_desc">开启后将使用android.activity.windowingMode = 填入的值来拉起activity，不同机型效果可能不同，需要自行尝试。已知ColorOS17填入6时可跳过弹窗。</string>
+    <string name="settings_activity_windowing_hint">windowingMode 值（填入整数）</string>
+    <string name="toast_windowing_saved">windowingMode 值已保存：%1$d</string>
+    <string name="toast_windowing_invalid">请填入 -2147483648 到 2147483647 之间的整数，已改回 %1$d</string>
+    <string name="toast_windowing_open_failed">打开失败，可能是设置的windowingMode有误，请检查</string>
+    <string name="settings_warm_max_title">单次预热数量上限</string>
+    <string name="settings_warm_max_count">最多 %1$d 个</string>
+    <string name="settings_warm_max_unlimited">不限数量</string>
+    <string name="settings_warm_max_helper">候选比上限多时，先按「预热权重」挑（名单页点「设置」设）。</string>
+    <string-array name="warm_max_choices">
+        <item>1个</item>
+        <item>2个</item>
+        <item>3个</item>
+        <item>5个</item>
+        <item>8个</item>
+        <item>不限</item>
+    </string-array>
+    <string name="settings_warm_params_title">预热参数</string>
+    <!-- 「预热参数」那行的小字（0.7.39-M6 / 60）：三个值的现状。 -->
+    <string name="settings_warm_params_summary">单次预热数量上限-%1$s•同应用冷却时间-%2$s•串行间隔-%3$s</string>
+    <string name="settings_warm_params_max_count">%1$d个</string>
+    <string name="settings_warm_params_max_unlimited">不限</string>
+    <string name="settings_warm_params_cooldown">%1$d秒</string>
+    <string name="settings_warm_params_cooldown_off">不冷却</string>
+    <string name="settings_warm_params_gap">%1$d毫秒</string>
+    <string name="settings_warm_params_gap_off">不等</string>
+    <string name="settings_warm_cooldown_hint">同应用冷却时间（秒）</string>
+    <string name="settings_warm_cooldown_helper">默认 60，可选 0–3600；填 0 = 不冷却。</string>
+    <string name="settings_warm_gap_hint">串行间隔（毫秒）</string>
+    <string name="settings_warm_gap_helper">默认 120，可选 0–10000；填 0 = 不等。</string>
+    <string name="toast_warm_cooldown_saved">同应用冷却已设为 %1$d 秒</string>
+    <string name="toast_warm_cooldown_invalid">请填入 0–3600 的整数秒，已改回 %1$d</string>
+    <string name="toast_warm_gap_saved">串行间隔已设为 %1$d ms</string>
+    <string name="toast_warm_gap_invalid">请填入 0–10000 的整数毫秒，已改回 %1$d</string>
+    <string name="action_clear_cooldown">清除冷却记录</string>
+    <string name="toast_cooldown_cleared">冷却记录已清除</string>
+
+    <!-- 设置页：特权增强（M4，0.7.40-M6 / 61 起挪到「触发场景」下面） -->
+    <string name="settings_privileged_section">特权增强</string>
+    <string name="settings_privileged_checking">特权通道：检查中…</string>
+    <string name="settings_privileged_desc">Shizuku权限仅用于精确探活（通过pidof查看目标进程是否存在），通过预热前后探活来调试预热效果。调试完成后关闭Shizuku权限不影响正常预热。</string>
+    <string name="action_privileged_grant">申请授权</string>
+    <string name="action_privileged_refresh">刷新状态</string>
+    <string name="settings_skip_running">应用进程存在时不预热</string>
+    <string name="toast_privileged_grant_sent">已向 Shizuku 申请授权，请在它弹出的对话框里允许</string>
+    <string name="toast_privileged_no_binder">还没收到 Shizuku 的 binder：先在 Shizuku 应用里启动服务（无线调试 / root），并在那里给本应用授权</string>
+    <string name="toast_privileged_granted">已获得 Shizuku 授权</string>
+    <string name="toast_privileged_denied">Shizuku 授权被拒绝</string>
+
+    <!-- 状态页 -->
+    <string name="section_permissions">权限</string>
+    <string name="section_runtime">运行状态</string>
+    <string name="dialog_close">关闭</string>
+
+    <string name="perm_listener_title">通知使用权</string>
+    <string name="perm_listener_desc">读取当前通知、判定横幅与锁屏可见通知</string>
+    <string name="perm_accessibility_title">无障碍服务</string>
+    <string name="perm_accessibility_desc">判定通知面板展开与锁屏状态（下拉面板触发必需的）</string>
+    <string name="perm_post_notifications_title">通知权限</string>
+    <string name="perm_post_notifications_desc">用于展示常驻监听通知</string>
+    <string name="perm_battery_title">电池优化白名单</string>
+    <string name="perm_battery_desc">避免监听服务被系统冻结或杀掉</string>
+    <string name="perm_battery_advice">建议锁定后台并开启自启动和关联启动</string>
+
+    <string name="row_service_title">前台监听服务</string>
+    <string name="row_nls_title">通知监听器</string>
+    <string name="row_nls_detail">当前活动通知 %1$d 条</string>
+    <string name="row_foreground_title">当前前台应用</string>
+    <string name="row_foreground_age">%1$d 秒前</string>
+    <string name="row_shade_title">面板判定</string>
+    <string name="row_warm_title">预热引擎</string>
+    <string name="row_warm_off">已关闭（在「设置」里打开）</string>
+    <string name="row_warm_idle">已启用，暂无预热记录</string>
+    <string name="row_warm_last">已启用，上次：%1$s</string>
+    <string name="row_warm_list_whitelist">名单：白名单，已选 %1$d 个 · 单次上限 %2$s</string>
+    <string name="row_warm_list_whitelist_empty">名单：白名单里一个都没选 —— 现在不会预热任何应用</string>
+    <string name="row_warm_list_blacklist">名单：黑名单，已排除 %1$d 个 · 单次上限 %2$s</string>
+
+    <string name="value_granted">已授予</string>
+    <string name="value_denied">未授予</string>
+    <string name="value_running">运行中</string>
+    <string name="value_stopped">未运行</string>
+    <string name="value_connected">已连接</string>
+    <string name="value_disconnected">未连接</string>
+    <string name="value_unknown">未知</string>
+    <string name="shade_state_open">展开</string>
+    <string name="shade_state_closed">收起</string>
+    <string name="shade_state_unknown">尚未判定</string>
+    <string name="shade_state_unknown_detail">未命中任何规则，见日志「诊断」</string>
+
+    <string name="action_grant">去授权</string>
+    <string name="action_restart_service">重启监听服务</string>
+
+    <!-- 设置页 -->
+    <string name="settings_trigger_section">触发场景</string>
+    <string name="settings_trigger_banner">收到横幅通知时</string>
+    <string name="settings_trigger_shade">下拉通知中心时</string>
+    <string name="settings_trigger_shade_desc">预热通知中心所有通知（包含流体云）对应的应用</string>
+    <string name="settings_trigger_lockscreen">锁屏点亮时</string>
+    <string name="settings_trigger_advanced">高级设置＞</string>
+
+    <!-- 横幅 / 锁屏两行的小字：把当前档位直接写在行里（0.7.38-M6 / 59）。 -->
+    <string name="settings_trigger_summary_on">开</string>
+    <string name="settings_trigger_summary_off">关</string>
+    <string name="settings_trigger_summary">宽松判定-%1$s•%2$s</string>
+    <string name="settings_trigger_banner_always">输入时一律拉起activity</string>
+    <string name="settings_trigger_banner_defer">延迟拉起activity</string>
+    <string name="settings_trigger_banner_never">一律不拉起activity</string>
+    <string name="settings_trigger_live_off">实时通知预热-关闭</string>
+    <string name="settings_trigger_live_strict">实时通知预热-严格</string>
+    <string name="settings_trigger_live_normal">实时通知预热-中等</string>
+    <string name="settings_trigger_live_wide">实时通知预热-宽松</string>
+
+    <!-- 横幅触发高级设置（弹窗） -->
+    <string name="settings_banner_advanced_title">横幅触发高级设置</string>
+    <string name="settings_banner_loose_title">横幅宽松判定</string>
+    <string name="settings_banner_loose_desc">若存在弹出横幅通知未触发预热的情况，请尝试此功能，开启后会将所有新通知都判定为横幅通知</string>
+    <string name="settings_banner_act_title">输入时拉起activity行为</string>
+    <string name="settings_banner_act_desc">当正在输入时收到横幅通知，触发拉起activity方式预热时，可能会导致输入框失焦、输入法缩回，若存在该情况，请选择延迟触发或不触发。唤醒后台预热方式不受影响。</string>
+    <string name="settings_banner_act_never">一律不拉起activity</string>
+    <string name="settings_banner_act_defer">待输入法收回后拉起activity</string>
+    <string name="settings_banner_act_always">一律拉起activity</string>
+    <string name="settings_ime_poll_hint">延迟轮询检测间隔（毫秒）</string>
+    <string name="settings_ime_poll_helper">输入法收回只能靠轮询判断；可选 100–2000，默认 300。</string>
+    <string name="settings_ime_defer_hint">最长延迟时间（毫秒）</string>
+    <string name="settings_ime_defer_helper">超过这个时间就视为横幅已缩回，不再轮询；可选 1000–20000，默认 10000。</string>
+
+    <!-- 锁屏触发高级设置（弹窗） -->
+    <string name="settings_lockscreen_advanced_title">锁屏触发高级设置</string>
+    <string name="settings_lockscreen_loose_title">锁屏普通通知宽松判定</string>
+    <string name="settings_lockscreen_loose_desc">默认尝试精确匹配锁屏显示的通知并预热，若存在漏预热的情况，请尝试此功能，开启后锁屏状态也会直接预热通知中心内所有通知对应的应用。ColorOS 的锁屏岛无法精确判定内容，若使用锁屏岛请打开此开关。</string>
+    <string name="settings_live_warm_title">实时通知（流体云）预热</string>
+    <string name="settings_live_warm_desc">开启后会尝试预热实时通知（流体云）对应的应用</string>
+    <string name="settings_live_range_label">判定范围</string>
+    <string name="settings_live_range_strict">严格</string>
+    <string name="settings_live_range_normal">中等</string>
+    <string name="settings_live_range_wide">宽松</string>
+    <string name="settings_live_range_desc">应用无法精准识别实时通知（流体云）内容。判定范围越严格，越会尝试精确识别实时通知，越宽松则越容易将普通通知也识别为实时通知。</string>
+
+
+    <string name="settings_boot_autostart">开机后自动拉起监听服务</string>
+    <string name="settings_accessibility_desc">无障碍服务开机自启需授予<b>写入安全设置权限</b>，如已执行请忽略。</string>
+    <string name="settings_accessibility_state_on">已授予写入安全设置权限</string>
+    <string name="settings_accessibility_state_off">未授予写入安全设置权限</string>
+    <string name="settings_accessibility_state_line">当前：%1$s · %2$s</string>
+    <string name="settings_accessibility_service_on">无障碍服务已启用</string>
+    <string name="settings_accessibility_service_off">无障碍服务未启用</string>
+    <string name="action_accessibility_grant">授予权限</string>
+    <string name="action_accessibility_run">执行</string>
+    <string name="action_accessibility_copy">复制</string>
+
+    <string name="dialog_accessibility_title">授予写入安全设置权限</string>
+    <string name="dialog_accessibility_body">这条命令把 <b>WRITE_SECURE_SETTINGS</b> 授给本应用。它是 shell（adb / Shizuku）能授予普通应用的一个开发权限：有它之后本应用自己就能写系统设置，于是<b>开机广播进来时</b>可以把被系统关掉的无障碍服务写回系统设置 —— 「开机自启」里无障碍那一半靠的就是它（没有它，重启后 adb 模式的 Shizuku 自己也还没起来，谁都没法写）。\n\n有 Shizuku / root：点右下角「执行」由本应用代跑，跑完会提示成功还是失败。\n没有：点「复制」（或长按选中上面的命令），粘到电脑的 adb 终端跑。\n\n这条命令是<b>幂等</b>的：已经授予过再跑一次也只是原样再授一遍。\n\n它<b>不</b>等于打开无障碍服务本身：无障碍现在是关着的话，仍要在系统「无障碍」页里开启一次（本应用不替从没开启过的用户打开它）。</string>
+    <string name="dialog_accessibility_state_done">当前：已授予写入安全设置权限 —— 开机时会用它补写无障碍。</string>
+    <string name="dialog_accessibility_state_todo">当前：还没授予写入安全设置权限 —— 开机时补写不了无障碍。</string>
+    <string name="toast_accessibility_grant_done">已授予：写入安全设置权限已生效</string>
+    <string name="toast_accessibility_grant_failed">执行完了但这个权限还没生效，原始输出在「权限」类别的日志里</string>
+    <string name="toast_accessibility_copied">命令已复制，粘到电脑的 adb 终端跑</string>
+
+    <!-- 设置页「其他设置」里的「服务异常通知」四枚开关 -->
+    <string name="settings_notify_watch_title">服务异常通知</string>
+    <string name="settings_notify_watch_listener">通知监听断开</string>
+    <string name="settings_notify_watch_accessibility">无障碍服务被关掉</string>
+    <string name="settings_notify_watch_service">监听服务被系统杀掉</string>
+    <string name="settings_notify_watch_privileged">特权通道（Shizuku）断开</string>
+
+    <string name="toast_ime_poll_saved">轮询间隔已设为 %1$d ms</string>
+    <string name="toast_ime_poll_invalid">请填入 100–2000 的整数毫秒，已改回 %1$d</string>
+    <string name="toast_ime_defer_saved">最长延后已设为 %1$d ms</string>
+    <string name="toast_ime_defer_invalid">请填入 1000–20000 的整数毫秒，已改回 %1$d</string>
+
+    <!-- 日志页顶部右上角的两枚开关（0.7.40-M6 / 61 从设置页搬来，不再带小字） -->
+    <string name="settings_diag_log">记录诊断日志</string>
+    <string name="settings_log_removed">记录通知移除事件</string>
+
+    <string name="settings_hide_recents">在最近任务中隐藏</string>
+
+    <!-- 日志页 -->
+    <string name="log_filter_all">全部</string>
+    <string name="log_empty">暂无日志\n\n授予权限并触发一次场景后，这里会出现记录。</string>
+    <string name="action_clear_log">清空</string>
+    <string name="action_export_log">导出</string>
+    <string name="toast_log_cleared">日志已清空</string>
+    <string name="toast_export_failed">导出失败，日志目录不可写</string>
+    <string name="toast_service_restarting">正在重启监听服务</string>
+    <string name="log_clear_title">清空日志</string>
+    <string name="log_clear_message">将同时删除已落盘的日志文件，确定继续？</string>
+    <string name="dialog_ok">确定</string>
+    <string name="dialog_cancel">取消</string>
+    <string name="export_chooser_title">导出事件日志</string>
+</resources>

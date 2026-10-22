@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  状态页里一格的内容（0.7.29-M6 / 50）。
+
+  两套标题：
+  · block_title   —— 权限那几格用（14sp、正色）。它才是这一格的主语，状态在它下面；
+  · block_caption —— 运行状态的指标格用（11sp、次级色）。值才是主角，标题退到后面。
+
+  值和操作提示的颜色与文案都由代码给，见 ui/StatusBlockView。
+  没用到的行一律 GONE，高度靠同行里最高的那一格撑（见 fragment_status.xml 里的注释）。
+-->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        android:id="@+id/block_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textAppearance="?attr/textAppearanceLabelLarge"
+        android:textColor="?attr/colorOnSurface"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/block_caption"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textAppearance="?attr/textAppearanceLabelSmall"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/block_value"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textAppearance="?attr/textAppearanceTitleSmall"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/block_detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:ellipsize="end"
+        android:maxLines="3"
+        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/block_note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:ellipsize="end"
+        android:maxLines="3"
+        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/block_action"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:maxLines="1"
+        android:textAppearance="?attr/textAppearanceLabelLarge"
+        android:textColor="?attr/colorPrimary"
+        android:visibility="gone" />
+
+</merge>

@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  某个应用的设置（名单页点行右边的「设置」打开，长按一行等价）。
+
+  三块：完整包名（0.7.11-M6 / 32 起；行里的包名最多两行、再长省略，全名在这里，
+  可长按选中复制，直接拿去跑 adb）、预热权重、**唤醒方式**（0.7.5 起逐应用二选一：
+  唤醒后台 / 拉起 Activity）。这是一张设置卡 —— 改完自己按关闭，不因为点了一下就消失。
+  0.7.61-M6 / 82 起「尝试后台启动activity」也在这里逐应用设置，位于「选 Activity…」下方。
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/tv_settings_package"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:breakStrategy="simple"
+            android:textIsSelectable="true"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/applist_settings_weight_section"
+            android:textAppearance="?attr/textAppearanceLabelLarge" />
+
+        <TextView
+            android:id="@+id/tv_settings_weight_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/applist_settings_weight_message"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
+        <SeekBar
+            android:id="@+id/sb_weight"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:max="2"
+            android:progress="0" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+            <TextView
+                android:id="@+id/tv_weight_0"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                tools:text="普通" />
+
+            <TextView
+                android:id="@+id/tv_weight_1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                tools:text="较高" />
+
+            <TextView
+                android:id="@+id/tv_weight_2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                tools:text="最高" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="?attr/colorOutlineVariant" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/applist_settings_activity_section"
+            android:textAppearance="?attr/textAppearanceLabelLarge" />
+
+        <RadioGroup
+            android:id="@+id/rg_method"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="vertical">
+
+            <RadioButton
+                android:id="@+id/rb_method_routes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/applist_method_routes" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/app_settings_radio_text_inset"
+                android:layout_marginBottom="4dp"
+                android:text="@string/applist_method_routes_desc"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <RadioButton
+                android:id="@+id/rb_method_activity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/applist_method_activity" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/app_settings_radio_text_inset"
+                android:layout_marginBottom="4dp"
+                android:text="@string/applist_method_activity_desc"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+        </RadioGroup>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_activity_pick"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/app_settings_radio_text_inset"
+            android:layout_marginTop="6dp"
+            android:text="@string/applist_settings_activity_pick" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/sw_app_activity_behind"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/app_settings_radio_text_inset"
+            android:layout_marginTop="8dp"
+            android:text="@string/applist_settings_activity_behind" />
+
+        <TextView
+            android:id="@+id/tv_app_activity_behind_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/app_settings_radio_text_inset"
+            android:text="@string/applist_settings_activity_behind_desc"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
+        <TextView
+            android:id="@+id/tv_activity_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_chip"
+            android:backgroundTint="?attr/colorSurfaceVariant"
+            android:breakStrategy="simple"
+            android:paddingStart="8dp"
+            android:paddingTop="3dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="3dp"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
+    </LinearLayout>
+</ScrollView>

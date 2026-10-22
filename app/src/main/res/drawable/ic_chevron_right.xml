@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  「预热参数」那行的箭头（0.7.39-M6 / 60）：细线条 chevron，不是「＞」字符。
+  颜色由 ImageView 的 app:tint 决定（colorOnSurfaceVariant）。
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M9.5,6.5 L15,12 L9.5,17.5"
+        android:strokeColor="#FF000000"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="2" />
+</vector>

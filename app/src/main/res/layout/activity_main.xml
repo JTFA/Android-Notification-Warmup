@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!--
+        标题栏右侧的页面控件：日志页两枚开关、名单页「黑名单模式」开关 + 计数。
+        它们都叠在 MaterialToolbar 上、与「通知预热」同排，由各自 Fragment 在进入 / 离开时
+        切换可见性。开关不带自己的文字（MaterialSwitch 的文字会把它撑得很宽），左边各配一枚
+        11sp 的小标签；开关缩到 0.65 倍、装进 38dp 的框里，否则放不下。
+        63 补了 baselineAligned=false：这行既有 TextView 又有 FrameLayout，默认的基线对齐会把
+        文字按基线放到上面、开关却按 center_vertical 居中，两者错开一条缝。
+        64 补了 transformPivotY：只写 transformPivotX 会让 View 认为 pivot 已被显式指定，
+        布局时不再把 Y 归到中心，scaleY 就以顶部为基准往上缩 —— 高度从 32dp 加到 48dp 后
+        偏得更多。显式写成 24dp（48dp 的一半）才是「左边缘、垂直中心」。
+    -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="@string/app_name" />
+
+        <LinearLayout
+            android:id="@+id/log_switches"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="0dp"
+            android:paddingEnd="6dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_diag_log"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <FrameLayout
+                android:layout_width="38dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="2dp"
+                android:clipChildren="false">
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/sw_diag"
+                    android:layout_width="56dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="start|center_vertical"
+                    android:contentDescription="@string/settings_diag_log"
+                    android:scaleX="0.65"
+                    android:scaleY="0.65"
+                    android:transformPivotX="0dp"
+                    android:transformPivotY="24dp" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="@string/settings_log_removed"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <FrameLayout
+                android:layout_width="38dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="2dp"
+                android:clipChildren="false">
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/sw_log_removed"
+                    android:layout_width="56dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="start|center_vertical"
+                    android:contentDescription="@string/settings_log_removed"
+                    android:scaleX="0.65"
+                    android:scaleY="0.65"
+                    android:transformPivotX="0dp"
+                    android:transformPivotY="24dp" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/app_list_controls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:baselineAligned="false"
+            android:gravity="end|center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="112dp"
+            android:paddingEnd="6dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_blacklist_mode_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:labelFor="@id/sw_blacklist_mode"
+                android:text="@string/applist_blacklist_mode_switch"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <FrameLayout
+                android:layout_width="38dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="2dp"
+                android:clipChildren="false">
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/sw_blacklist_mode"
+                    android:layout_width="56dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="start|center_vertical"
+                    android:checked="false"
+                    android:contentDescription="@string/applist_blacklist_mode_switch"
+                    android:scaleX="0.65"
+                    android:scaleY="0.65"
+                    android:transformPivotX="0dp"
+                    android:transformPivotY="24dp" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_mode_hint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:gravity="end"
+                    android:maxLines="1"
+                    android:textAppearance="?attr/textAppearanceLabelSmall"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                <TextView
+                    android:id="@+id/tv_selected_count"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:gravity="end"
+                    android:maxLines="1"
+                    android:textAppearance="?attr/textAppearanceLabelSmall"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!--
+        通栏底栏（0.7.24-M6 / 45）：撤掉 0.7.18-M6 / 39 那套悬浮圆角矩形
+        （ShapeAppearanceOverlay.NotificationFixer.NavPill），回到「整个底栏都是底栏色」。
+
+        这里的关键是这个容器的底色：底栏本身只有 80dp，容器把同一个色一直铺到屏幕下沿 ——
+        手势提示条（导航栏）那一带也归它。底部 inset 由 MainActivity 加在容器的
+        paddingBottom 上（不是加在 root 上），所以图标不探进系统栏、底色却铺满到底。
+        NavigationBarView 内部取 android:background 当填充色，只认纯色：必须给
+        ?attr/colorSurfaceContainer，并把主题的 backgroundTint 显式关掉。
+    -->
+    <FrameLayout
+        android:id="@+id/bottom_bar_area"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurfaceContainer">
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_nav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorSurfaceContainer"
+            app:backgroundTint="@null"
+            app:labelVisibilityMode="labeled"
+            app:menu="@menu/bottom_nav" />
+
+    </FrameLayout>
+
+</LinearLayout>

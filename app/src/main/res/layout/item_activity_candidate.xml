@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Activity 候选列表里的一行。
+
+  整行可点 = 选中它（用这个）；下面两个按钮分别用普通方式 / launch-behind 方式
+  当场启动这一个，互不干扰：按钮吃掉自己的点击，其余落在行上。
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:minHeight="64dp"
+    android:orientation="vertical"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp"
+    tools:ignore="Overdraw">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/rb_candidate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:focusable="false"
+            android:importantForAccessibility="no" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!--
+              类名不再截断（0.7.9-M6 / 30）：原来是 maxLines=1 + ellipsize=middle，长名字只剩头尾，
+              挑组件时看不出是哪一个。现在折行显示全名；breakStrategy=simple 是给「整串没有空格」的
+              标识符用的 —— 一行放不下时按字符断行，而不是把它截掉。
+            -->
+            <TextView
+                android:id="@+id/tv_candidate_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:breakStrategy="simple"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                tools:text=".plugin.sns.ui.SnsUploadUI" />
+
+            <TextView
+                android:id="@+id/tv_candidate_verdict"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textAppearance="?attr/textAppearanceBodySmall" />
+
+            <TextView
+                android:id="@+id/tv_candidate_evidence"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="11sp"
+                tools:text="主题 com.example.Theme.Trans（windowIsTranslucent=true）" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="44dp"
+        android:layout_marginTop="4dp"
+        android:baselineAligned="false"
+        android:gravity="end"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_candidate_open"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:text="@string/applist_activity_open"
+            android:textSize="13sp"
+            app:cornerRadius="18dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_candidate_open_behind"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:minWidth="0dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:text="@string/applist_activity_open_behind"
+            android:textSize="13sp"
+            app:cornerRadius="18dp" />
+
+    </LinearLayout>
+
+    <com.google.android.material.divider.MaterialDivider
+        android:id="@+id/divider_candidate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp" />
+
+</LinearLayout>

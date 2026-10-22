@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!--
+        黑白名单开关、计数与说明按钮已搬到标题栏那一行（activity_main.xml 的 app_list_controls），
+        由 AppListFragment 在进入 / 离开时切换可见性；这里只留搜索与列表。
+    -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/search_layout"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="16dp"
+        android:hint="@string/applist_search_hint"
+        app:endIconMode="clear_text">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/search_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:maxLines="1" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/app_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="8dp" />
+
+        <TextView
+            android:id="@+id/app_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/applist_empty"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/app_progress"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true" />
+
+    </FrameLayout>
+
+</LinearLayout>

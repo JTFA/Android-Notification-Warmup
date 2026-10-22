@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    应用图标的前景（0.7.28-M6 / 49 起）：在火上烤的铃铛。
+
+    0.7.27 及以前就是一段白色的 Material 通知铃铛，用 <group> 做 scale 2 / translate(30,30)。
+    现在：
+    · 铃铛仍是同一段路径（造型一点没动），只把缩放与位移改成 scale 1.75 / translate(33,23.5)，
+      腾出底下的位置；
+    · 坐标已经预先算进路径里，不再用 <group> 变换 —— 矢量图里的渐变坐标不跟 group 变换走
+      （已知坑），绕开它的代价只是路径数字长一点；
+    · 铃铛自己带上「被烤」的颜色：上白、下暖黄的竖直渐变；
+    · 底下三簇火苗（中间一簇高、两侧各一簇），与铃底留 4 个单位的缝。
+
+    这份图同时是 ic_launcher 的 foreground 与 monochrome：单色层只取不透明度、系统再统一上色，
+    所以渐变在那里会被抹掉，只剩「铃 + 火」的轮廓 —— 那道缝与火苗的造型就是为了让这个轮廓在
+    单色下也能认出来。也因为这个，铃底后面那层暖光（示意图里的 radial glow）没有做：它会变成
+    一整块不透明的圆，把铃和火糊成一个大疙瘩。
+
+    内容范围 x 39.5–68.5、y 26.1–84.5：都在 66dp 保证可见的那个圆（圆心 54,54、半径 33）里，
+    只有两侧火苗最外的根部贴着线（半径约 33.8），直径 72 的圆形遮罩不会切到它。
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 铃铛（原 Material 通知路径 × 1.75 + (33,23.5)）：上白 → 下暖黄，像被烤过 -->
+    <path
+        android:pathData="M54,62 c1.925,0,3.5,-1.575,3.5,-3.5 h-7 c0,1.925,1.558,3.5,3.5,3.5 z M64.5,51.5 v-8.75 c0,-5.372,-2.87,-9.87,-7.875,-11.06 L56.625,30.5 c0,-1.452,-1.172,-2.625,-2.625,-2.625 s-2.625,1.173,-2.625,2.625 v1.19 C46.353,32.88,43.5,37.36,43.5,42.75 v8.75 l-3.5,3.5 v1.75 h28 v-1.75 l-3.5,-3.5 z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0"
+                android:startY="26.125"
+                android:endX="0"
+                android:endY="62"
+                android:startColor="#FFFFFFFF"
+                android:centerColor="#FFFFF0D2"
+                android:endColor="#FFFFB347" />
+        </aapt:attr>
+    </path>
+
+    <!-- 火苗：中间一簇 -->
+    <path
+        android:pathData="M54,66 C 50.5,71 47,73.5 47,78 C 47,82 50,84.5 54,84.5 C 58,84.5 61,82 61,78 C 61,73.5 57.5,71 54,66 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0"
+                android:startY="52"
+                android:endX="0"
+                android:endY="86"
+                android:startColor="#FFFFC24A"
+                android:centerColor="#FFF56A10"
+                android:endColor="#FFB81B06" />
+        </aapt:attr>
+    </path>
+
+    <!-- 火苗：左边一簇 -->
+    <path
+        android:pathData="M45,71 C 42,74.5 39.5,76.5 39.5,79.5 C 39.5,82.5 42,84.5 45,84.5 C 48,84.5 50,82.5 50,79.5 C 50,76.5 47,74.5 45,71 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0"
+                android:startY="52"
+                android:endX="0"
+                android:endY="86"
+                android:startColor="#FFFFC24A"
+                android:centerColor="#FFF56A10"
+                android:endColor="#FFB81B06" />
+        </aapt:attr>
+    </path>
+
+    <!-- 火苗：右边一簇 -->
+    <path
+        android:pathData="M63,71 C 66,74.5 68.5,76.5 68.5,79.5 C 68.5,82.5 66,84.5 63,84.5 C 60,84.5 58,82.5 58,79.5 C 58,76.5 61,74.5 63,71 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0"
+                android:startY="52"
+                android:endX="0"
+                android:endY="86"
+                android:startColor="#FFFFC24A"
+                android:centerColor="#FFF56A10"
+                android:endColor="#FFB81B06" />
+        </aapt:attr>
+    </path>
+</vector>

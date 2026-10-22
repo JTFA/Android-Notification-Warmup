@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    只监听窗口变化：面板展开/收起、锁屏出现都由窗口变化产生。
+    不订阅 typeWindowContentChanged，避免状态栏时钟之类的高频内容变化。
+    0.7.37-M6 / 58 撤掉了 0.7.36-M6 / 57 试过的「点击 / 长按」订阅：真机实测点流体云胶囊
+    收不到任何事件（ColorOS 的状态栏不给无障碍看那一颗），那批代码与开关一起拆了（见 README 文末）。
+-->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowsChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagReportViewIds|flagRetrieveInteractiveWindows|flagIncludeNotImportantViews"
+    android:canRetrieveWindowContent="true"
+    android:description="@string/a11y_description"
+    android:notificationTimeout="100"
+    android:summary="@string/a11y_summary" />

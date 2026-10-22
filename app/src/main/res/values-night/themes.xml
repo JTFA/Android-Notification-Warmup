@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        深色主题下的那一份主题（与 values/themes.xml 成对，理由见那边的注释）。
+
+        样式资源按配置整套替换、不合并，所以要原样重写一遍：
+        parent 也必须显式写回来 —— 不写的话 aapt 会按名字推断父样式，
+        推出一个不存在的 Theme 或推错。
+
+        与浅色那份的差别只有图标明暗：深色主题用浅色图标（false）。
+    -->
+    <style name="Theme.NotificationFixer" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">?attr/colorSurface</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+    </style>
+</resources>

@@ -1,0 +1,38 @@
+pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        // 本机离线（dl.google.com 不可达），dev.rikka.shizuku 的四个小构件（约 60KB）
+        // 以本地 Maven 仓库形式随工程走，保证 `--offline` 也能构建。
+        // 代理可用时可直接删掉这一行与 libs-repo/ 目录，改用 mavenCentral 正常解析。
+        maven {
+            url = uri("libs-repo")
+            content {
+                includeGroup("dev.rikka.shizuku")
+            }
+        }
+        google()
+        mavenCentral()
+    }
+}
+
+// 工程名保持 ASCII，避免 Windows 下 Gradle 文件编码问题；应用显示名见 res/values/strings.xml
+rootProject.name = "NotificationFixer"
+include ':app'
