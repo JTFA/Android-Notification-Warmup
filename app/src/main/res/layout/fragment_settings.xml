@@ -69,7 +69,7 @@
                             android:layout_height="wrap_content"
                             android:textAppearance="?attr/textAppearanceBodySmall"
                             android:textColor="?attr/colorOnSurfaceVariant"
-                            tools:text="当前仅会预热名单设置的应用" />
+                            tools:text="仅会预热名单设置的应用" />
                     </LinearLayout>
 
                     <com.google.android.material.materialswitch.MaterialSwitch

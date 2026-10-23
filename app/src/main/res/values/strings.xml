@@ -4,7 +4,7 @@
 
     <!-- 首次安装声明 -->
     <string name="disclaimer_title">声明</string>
-    <string name="disclaimer_message">本应用开发初衷是解决ColorOS中点开通知时过渡动画缺失问题，通过无障碍监控下拉通知面板、锁屏点亮、收到横幅通知场景，并预先唤醒发通知的应用的后台进程， 以避免点开通知时因进程冷启动而卡顿。使用本应用可能会导致耗电增加。</string>
+    <string name="disclaimer_message">本应用开发初衷是解决ColorOS中点开通知时过渡动画缺失问题，通过无障碍监控下拉通知面板、锁屏点亮、收到横幅通知场景，并预先唤醒发通知的应用的后台进程，以避免点开通知时因进程冷启动而卡顿。本应用未申请网络权限，不会收集您的信息。使用本应用可能会导致耗电增加。</string>
     <string name="disclaimer_disagree">不同意</string>
     <string name="disclaimer_agree">同意</string>
 
@@ -103,7 +103,7 @@
     <string name="settings_experimental_section">实验功能</string>
     <string name="settings_warm_enabled">启用预热</string>
     <!-- 「启用预热」下面那行小字（0.7.38-M6 / 59）：随开关换说法。 -->
-    <string name="settings_warm_state_on">当前仅会预热名单设置的应用</string>
+    <string name="settings_warm_state_on">仅会预热名单设置的应用</string>
     <string name="settings_warm_state_off">当前仅记录日志，不预热任何应用</string>
     <string name="settings_activity_windowing">尝试跳过打开第三方应用授权弹窗</string>
     <string name="settings_activity_windowing_desc">开启后将使用android.activity.windowingMode = 填入的值来拉起activity，不同机型效果可能不同，需要自行尝试。已知ColorOS17填入6时可跳过弹窗。</string>

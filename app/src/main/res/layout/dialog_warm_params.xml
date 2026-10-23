@@ -5,7 +5,8 @@
   三项，项与项之间一条分割线：单次预热数量上限（下拉框）、同应用冷却时间（秒）、
   串行间隔（毫秒）。每一行都是「左边一列：大字 + 小字；右侧：控件」—— 控件对整列居中，
   不是单独占一行。两个数字框与下拉框同一种盒子（textInputOutlinedStyle、关掉浮动标签、
-  固定 112dp），下拉框右端是 Material 自带的倒三角。
+  固定 112dp 宽、48dp 高），下拉框右端是 Material 自带的倒三角。下拉框文字显式留出
+  16dp 左内边距，两个数字框用 12dp 上下内边距把 24dp 行高放进 48dp 盒子里。
 
   即改即生效：这里没有「确定」，底栏左边「清除冷却记录」、右边「关闭」（代码里接）。
 -->
@@ -56,7 +57,7 @@
                 android:id="@+id/dlg_til_warm_max"
                 style="?attr/textInputOutlinedStyle"
                 android:layout_width="112dp"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:layout_marginStart="12dp"
                 app:endIconMode="dropdown_menu"
                 app:hintEnabled="false">
@@ -69,6 +70,8 @@
                     android:cursorVisible="false"
                     android:gravity="start|center_vertical"
                     android:inputType="none"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
                     android:singleLine="true" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
@@ -112,7 +115,7 @@
                 android:id="@+id/dlg_til_warm_cooldown"
                 style="?attr/textInputOutlinedStyle"
                 android:layout_width="112dp"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:layout_marginStart="12dp"
                 app:hintEnabled="false">
 
@@ -124,6 +127,8 @@
                     android:imeOptions="actionDone"
                     android:inputType="number"
                     android:maxLength="4"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
                     android:singleLine="true" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
@@ -167,7 +172,7 @@
                 android:id="@+id/dlg_til_warm_gap"
                 style="?attr/textInputOutlinedStyle"
                 android:layout_width="112dp"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:layout_marginStart="12dp"
                 app:hintEnabled="false">
 
@@ -179,6 +184,8 @@
                     android:imeOptions="actionDone"
                     android:inputType="number"
                     android:maxLength="5"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
                     android:singleLine="true" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>

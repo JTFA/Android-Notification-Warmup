@@ -2,6 +2,8 @@ package com.jtfa.notificationfixer.detect;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -14,10 +16,13 @@ import com.jtfa.notificationfixer.core.HealthWatch;
 import com.jtfa.notificationfixer.core.Permissions;
 import com.jtfa.notificationfixer.core.Prefs;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -264,14 +269,94 @@ public class NotificationAccessService extends NotificationListenerService {
         }
     }
 
+    /**
+     * 系统把通知从状态栏移除时回调。
+     *
+     * <p>{@link #REASON_CLICK} 是用户点开通知的唯一公开信号，且发生在点击之后。它不走
+     * 「记录通知移除事件」开关：点击是低频、用来解释卡顿时序的关键证据，默认就要留下；
+     * 滑动清除等其它原因仍然只在用户打开那枚开关时记录。
+     */
+    @Override
+    public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap, int reason) {
+        handleNotificationRemoved(sbn, reason);
+    }
+
+    /** 兼容只回调单参数版本的系统；这里拿不到 reason，按普通移除处理。 */
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
-        if (sbn == null || !Prefs.isLogRemoved()) {
+        handleNotificationRemoved(sbn, 0);
+    }
+
+    private void handleNotificationRemoved(StatusBarNotification sbn, int reason) {
+        if (sbn == null) {
+            return;
+        }
+        if (reason == REASON_CLICK) {
+            logNotificationClick(sbn);
+            return;
+        }
+        if (!Prefs.isLogRemoved()) {
             return;
         }
         String key = sbn.getKey();
         EventLog.get().log(EventLog.CAT_NOTIF,
                 "移除 " + sbn.getPackageName(),
                 "key=" + Integer.toHexString(key == null ? 0 : key.hashCode()));
+    }
+
+    /**
+     * 记录一次点击。日志页的时间由 {@link EventLog} 自动打，数据里再写通知的发布时刻与
+     * 点击距发布的毫秒数，方便和相邻的「触发 / 预热」记录对齐，判断是预热还没完成就点了，
+     * 还是预热完成后点开仍然慢。
+     *
+     * <p>按要求不记录通知标题与正文，只用应用名、包名、key 哈希与渠道定位。
+     */
+    private void logNotificationClick(StatusBarNotification sbn) {
+        long clickedAt = System.currentTimeMillis();
+        String packageName = sbn.getPackageName();
+        String key = sbn.getKey();
+        String channelId = null;
+        try {
+            if (sbn.getNotification() != null) {
+                channelId = sbn.getNotification().getChannelId();
+            }
+        } catch (Throwable ignored) {
+            // 读不到渠道就只记能读到的部分
+        }
+
+        String label = labelOf(packageName);
+        String text = "点击通知 " + (packageName == null
+                ? "(无包名)"
+                : (label.isEmpty() ? packageName : label + "（" + packageName + "）"));
+
+        StringBuilder data = new StringBuilder();
+        data.append("key=").append(Integer.toHexString(key == null ? 0 : key.hashCode()));
+        if (channelId != null) {
+            data.append(" 渠道=").append(channelId);
+        }
+        long postTime = sbn.getPostTime();
+        if (postTime > 0L) {
+            long elapsed = Math.max(0L, clickedAt - postTime);
+            data.append(" 发布=")
+                    .append(new SimpleDateFormat("HH:mm:ss.SSS", Locale.US)
+                            .format(new Date(postTime)))
+                    .append(" 距发布=").append(elapsed).append("ms");
+        }
+        EventLog.get().log(EventLog.CAT_NOTIF, text, data.toString());
+    }
+
+    /** 应用名；读不到时返回空串，由调用方退回包名。 */
+    private String labelOf(String packageName) {
+        if (packageName == null) {
+            return "";
+        }
+        try {
+            PackageManager manager = getPackageManager();
+            ApplicationInfo info = manager.getApplicationInfo(packageName, 0);
+            CharSequence label = manager.getApplicationLabel(info);
+            return label == null ? "" : label.toString();
+        } catch (Exception e) {
+            return "";
+        }
     }
 }
