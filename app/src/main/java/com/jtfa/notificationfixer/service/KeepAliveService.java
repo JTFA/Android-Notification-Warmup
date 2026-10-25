@@ -173,6 +173,9 @@ public class KeepAliveService extends Service {
         filter.addAction(Intent.ACTION_USER_PRESENT);
         registerReceiver(mScreenStateReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
         mReceiverRegistered = true;
+        // 动态接收器只收变化；服务刚起来时先把当前显示状态读进来，避免第一条通知
+        // 因为还没收到 ACTION_SCREEN_ON/OFF 而沿用默认值。
+        ScreenStateReceiver.refresh(this);
     }
 
     private void unregisterScreenStateReceiver() {

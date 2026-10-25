@@ -21,12 +21,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 /**
- * 通知监听：横幅判定，以及为锁屏触发提供活动通知快照。
+ * 通知监听：全局新通知判定、锁屏活动通知快照，以及息屏期间快速预热的候选记录。
  *
  * <p>0.7.55-M6 / 76 起，系统解绑后主动调用 {@code requestRebind(...)}；只在通知使用权仍授予时尝试，
  * 并由常驻服务与状态页一起兜底（见 {@link #ensureConnected(Context)}）。
@@ -46,9 +49,33 @@ public class NotificationAccessService extends NotificationListenerService {
      * 通知中心或锁屏停留期间已经触发过预热的通知 key。
      *
      * <p>同一个 key 的更新（进度条、消息追加）不重复排队；新 key 才说明是这次停留期间
-     * 新出现的通知。两个场景都不活跃时清空；下一次展开/点亮由原有事件负责。
+     * 新出现的通知。两个场景都不活跃、或屏幕熄灭时清空；下一次展开/点亮由原有事件负责。
      */
     private final Set<String> mSceneNotifiedKeys = new HashSet<>();
+
+    /** 息屏期间收到的新通知保留多久、最多记多少个应用。 */
+    private static final long SCREEN_OFF_KEEP_MS = 10 * 60_000L;
+    private static final int SCREEN_OFF_MAX_PACKAGES = 64;
+
+    /**
+     * 息屏期间收到的新通知（只记包名、最近时间与锁屏可见置信度，不碰通知内容）。
+     *
+     * <p>用途只有一个：屏幕点亮瞬间先按这批应用预热一次，不等锁屏窗口排版。
+     * 读取时按当时的精确度阈值整批过滤、取走并清空；超过 {@link #SCREEN_OFF_KEEP_MS}
+     * 的自动丢掉。
+     */
+    private static final Object sScreenOffLock = new Object();
+    private static final LinkedHashMap<String, ScreenOffNotice> sScreenOffNotices =
+            new LinkedHashMap<>();
+
+    /** 一个应用在息屏期间的通知摘要。 */
+    private static final class ScreenOffNotice {
+
+        long lastUptimeMs;
+
+        /** 0–100：这个应用在息屏期间收到的通知里，最高的锁屏可见置信度。 */
+        int confidence;
+    }
 
     public static boolean isConnected() {
         return sConnected;
@@ -127,6 +154,94 @@ public class NotificationAccessService extends NotificationListenerService {
         }
     }
 
+    /**
+     * 记一条「息屏期间收到的新通知」。
+     *
+     * <p>只在新通知（不是重复更新、不是分组摘要）且屏幕确实熄灭时调用。
+     * {@code confidence} 是到达时按公开设置算出的锁屏可见置信度；同一应用取最高值，
+     * 精确度阈值留到亮屏时再按用户当时的滑杆过滤。
+     */
+    static void recordScreenOffNotice(String packageName, int confidence) {
+        if (packageName == null || packageName.isEmpty()) {
+            return;
+        }
+        int value = Math.max(0, Math.min(100, confidence));
+        long now = SystemClock.uptimeMillis();
+        synchronized (sScreenOffLock) {
+            pruneScreenOffLocked(now);
+            ScreenOffNotice notice = sScreenOffNotices.get(packageName);
+            if (notice == null) {
+                if (sScreenOffNotices.size() >= SCREEN_OFF_MAX_PACKAGES) {
+                    Iterator<String> iterator = sScreenOffNotices.keySet().iterator();
+                    if (iterator.hasNext()) {
+                        iterator.next();
+                        iterator.remove();
+                    }
+                }
+                notice = new ScreenOffNotice();
+                sScreenOffNotices.put(packageName, notice);
+            }
+            notice.lastUptimeMs = now;
+            notice.confidence = Math.max(notice.confidence, value);
+        }
+    }
+
+    /**
+     * 取走息屏期间的新通知应用，按最近收到排前面，并清空记录。
+     *
+     * @param precision 当前精确度阈值；置信度大于等于它的应用才算「可能上锁屏」
+     */
+    static List<String> takeScreenOffNotices(int precision) {
+        int threshold = Prefs.clampLockscreenFilterPrecision(precision);
+        long now = SystemClock.uptimeMillis();
+        List<String> targets = new ArrayList<>();
+        synchronized (sScreenOffLock) {
+            pruneScreenOffLocked(now);
+            if (sScreenOffNotices.isEmpty()) {
+                return targets;
+            }
+            List<Map.Entry<String, ScreenOffNotice>> entries =
+                    new ArrayList<>(sScreenOffNotices.entrySet());
+            sScreenOffNotices.clear();
+            Collections.sort(entries, (left, right) ->
+                    Long.compare(right.getValue().lastUptimeMs, left.getValue().lastUptimeMs));
+            StringBuilder detail = new StringBuilder();
+            for (Map.Entry<String, ScreenOffNotice> entry : entries) {
+                int confidence = entry.getValue().confidence;
+                if (detail.length() > 0) {
+                    detail.append("，");
+                }
+                detail.append(entry.getKey()).append('=').append(confidence);
+                if (confidence >= threshold) {
+                    targets.add(entry.getKey());
+                }
+            }
+            EventLog.get().log(EventLog.CAT_DIAG,
+                    "息屏记录 " + entries.size() + " 个应用，精确度 " + threshold
+                            + " → 可能上锁屏 " + targets.size() + " 个",
+                    "逐应用：" + detail);
+        }
+        return targets;
+    }
+
+    /** 清空息屏记录（开关关闭、未处于锁屏等情况下用）。 */
+    static void clearScreenOffNotices() {
+        synchronized (sScreenOffLock) {
+            sScreenOffNotices.clear();
+        }
+    }
+
+    private static void pruneScreenOffLocked(long now) {
+        Iterator<Map.Entry<String, ScreenOffNotice>> iterator =
+                sScreenOffNotices.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, ScreenOffNotice> entry = iterator.next();
+            if (now - entry.getValue().lastUptimeMs > SCREEN_OFF_KEEP_MS) {
+                iterator.remove();
+            }
+        }
+    }
+
     @Override
     public void onListenerConnected() {
         super.onListenerConnected();
@@ -180,43 +295,67 @@ public class NotificationAccessService extends NotificationListenerService {
 
         // 0.7.69-M6 / 90：通知中心或锁屏已经处于停留状态时，新通知不会再产生一次
         // 「面板展开」/「锁屏点亮」事件。这里在通知真正到达时补一次当前场景的触发。
-        // 同一通知只走一个场景，顺序为：通知中心 > 锁屏 > 横幅；同一个 key 只触发一次。
+        //
+        // 规则：
+        //   1. 屏幕没有真正点亮（含 AOD）时，所有自动触发都不发；亮屏后再按场景处理。
+        //   2. 场景优先：通知中心 / 锁屏命中时只发场景事件，全局新通知不再补一次。
+        //   3. 场景都没命中时，外层「收到新通知时」才走全局：内层开 = 只认横幅，
+        //      内层关 = 所有新通知；不再看界面与另外两个场景开关。
         String packageName = sbn.getPackageName();
+        boolean screenOn = ScreenStateReceiver.isScreenOn();
         boolean shadeOpen = ShadeAccessibilityService.isShadeOpen();
-        boolean lockscreenActive = signals.screenInteractive
-                && ScreenStateReceiver.isLocked(this);
+        boolean lockscreenActive = screenOn && ScreenStateReceiver.isLocked(this);
         synchronized (mSceneNotifiedKeys) {
-            if (!shadeOpen && !lockscreenActive) {
+            if (!screenOn || (!shadeOpen && !lockscreenActive)) {
                 mSceneNotifiedKeys.clear();
             }
         }
 
-        // 分组摘要点开只是展开分组；5 秒内的重复更新也不是新通知。两者都不补场景触发，
-        // 但仍允许后面的横幅分支按原规则处理（例如严格档的高重要度更新）。
+        // 分组摘要点开只是展开分组；5 秒内的重复更新也不是新通知。两者都不参与场景或
+        // 全局触发。全局分支同样用它兜住「更新」，即使仅横幅档把高重要度更新判成了横幅。
         boolean sceneCandidate = packageName != null
                 && !signals.groupSummary
                 && !signals.isUpdate;
 
-        if (shadeOpen && Prefs.isTriggerShade() && sceneCandidate) {
-            if (markSceneNotification(sbn)) {
-                TriggerBus.emit(new TriggerEvent(
-                        TriggerType.SHADE_NOTIFICATION,
-                        packageName,
-                        "通知中心内新通知",
-                        Collections.singletonList(packageName)));
+        // 息屏期间收到的新通知先记下来：亮屏瞬间按这批应用立刻预热一次，不等锁屏窗口排版。
+        // 只有「锁屏点亮时」和「息屏时尝试记录新锁屏通知，点亮屏幕快速预热」都开时才记；
+        // 全局「收到新通知时」与内层「仅横幅通知触发」不再参与这条快速通道。
+        if (!screenOn && sceneCandidate
+                && Prefs.isTriggerLockscreen()
+                && Prefs.isScreenOffFastWarm()) {
+            recordScreenOffNotice(packageName, signals.lockscreenConfidence);
+        }
+
+        boolean sceneTriggered = false;
+        if (screenOn && sceneCandidate) {
+            if (shadeOpen && Prefs.isTriggerShade()) {
+                // 场景一旦命中就由它负责这条通知：即使 key 已标记（重复）或锁屏探测还在
+                // 等待，也不让全局分支再补一次。
+                sceneTriggered = true;
+                if (markSceneNotification(sbn)) {
+                    TriggerBus.emit(new TriggerEvent(
+                            TriggerType.SHADE_NOTIFICATION,
+                            packageName,
+                            "通知中心内新通知",
+                            Collections.singletonList(packageName)));
+                }
+            } else if (lockscreenActive && Prefs.isTriggerLockscreen()) {
+                // 屏幕刚点亮时的 400ms 锁屏探测会把这条通知一起算进去。探测还在等待/重试时
+                // 只记 key、不单独发触发，避免探测和新通知各排一次。
+                sceneTriggered = true;
+                boolean first = markSceneNotification(sbn);
+                if (first && !ScreenStateReceiver.isLockscreenProbePending()) {
+                    TriggerBus.emit(new TriggerEvent(
+                            TriggerType.LOCKSCREEN_NOTIFICATION,
+                            packageName,
+                            "锁屏停留时新通知",
+                            Collections.singletonList(packageName)));
+                }
             }
-        } else if (lockscreenActive && Prefs.isTriggerLockscreen() && sceneCandidate) {
-            // 屏幕刚点亮时的 400ms 锁屏探测会把这条通知一起算进去。探测还在等待/重试时
-            // 只记 key、不单独发触发，避免探测和新通知各排一次。
-            boolean first = markSceneNotification(sbn);
-            if (first && !ScreenStateReceiver.isLockscreenProbePending()) {
-                TriggerBus.emit(new TriggerEvent(
-                        TriggerType.LOCKSCREEN_NOTIFICATION,
-                        packageName,
-                        "锁屏停留时新通知",
-                        Collections.singletonList(packageName)));
-            }
-        } else if (signals.isBanner && Prefs.isTriggerBanner()) {
+        }
+
+        if (!sceneTriggered && screenOn && Prefs.isTriggerBanner()
+                && sceneCandidate && signals.isBanner) {
             TriggerBus.emit(new TriggerEvent(
                     TriggerType.BANNER_NOTIFICATION,
                     signals.pkg,

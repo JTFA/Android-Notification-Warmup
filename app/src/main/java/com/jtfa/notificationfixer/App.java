@@ -6,6 +6,7 @@ import android.os.Process;
 import com.jtfa.notificationfixer.core.AccessibilityAutostart;
 import com.jtfa.notificationfixer.core.EventLog;
 import com.jtfa.notificationfixer.core.Prefs;
+import com.jtfa.notificationfixer.detect.ScreenStateReceiver;
 import com.jtfa.notificationfixer.detect.TriggerBus;
 import com.jtfa.notificationfixer.detect.TriggerEvent;
 import com.jtfa.notificationfixer.privileged.Privileged;
@@ -33,6 +34,9 @@ public class App extends Application {
         sInstance = this;
         Prefs.init(this);
         EventLog.init(this);
+        // 进程刚起来时先把「屏幕是否真正点亮」读进来；之后由 KeepAliveService 的
+        // ACTION_SCREEN_ON/OFF 接收器持续更新。通知监听可能比常驻服务更早连上。
+        ScreenStateReceiver.refresh(this);
 
         // 无障碍的补写（0.7.21-M6 / 42）：进程因任何原因起来都先看一眼。开机广播、通知监听被系统
         // bind、用户打开应用、常驻服务被重新拉起，都会走到这里 —— 只在这一眼里「该写才写」，

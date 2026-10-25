@@ -63,7 +63,7 @@
                 android:value="notification_prewarm_listener" />
         </service>
 
-        <!-- 通知使用权：横幅通知与锁屏可见通知的判定来源 -->
+        <!-- 通知使用权：新通知与锁屏可见通知的判定来源 -->
         <service
             android:name=".detect.NotificationAccessService"
             android:exported="true"

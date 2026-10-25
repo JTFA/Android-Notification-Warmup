@@ -19,7 +19,7 @@
     <string name="keepalive_channel_name">监听服务</string>
     <string name="keepalive_channel_desc">保持监听进程存活所需的常驻通知，可最小化显示</string>
     <string name="keepalive_title">通知预热正在监听</string>
-    <string name="keepalive_text">用于在下拉面板 / 锁屏点亮 / 横幅通知时预热目标应用进程</string>
+    <string name="keepalive_text">用于在下拉面板 / 锁屏点亮 / 收到新通知时预热目标应用进程</string>
     <string name="notify_channel_alert_name">监听提醒</string>
     <string name="notify_channel_alert_desc">服务异常时的一条提醒，可以直接划掉</string>
     <string name="notify_alert_title">通知预热：服务异常</string>
@@ -201,16 +201,18 @@
 
     <!-- 设置页 -->
     <string name="settings_trigger_section">触发场景</string>
-    <string name="settings_trigger_banner">收到横幅通知时</string>
+    <string name="settings_trigger_banner">收到新通知时</string>
     <string name="settings_trigger_shade">下拉通知中心时</string>
     <string name="settings_trigger_shade_desc">预热通知中心所有通知（包含流体云）对应的应用</string>
     <string name="settings_trigger_lockscreen">锁屏点亮时</string>
     <string name="settings_trigger_advanced">高级设置＞</string>
 
-    <!-- 横幅 / 锁屏两行的小字：把当前档位直接写在行里（0.7.38-M6 / 59）。 -->
+    <!-- 新通知 / 锁屏两行的小字：把当前档位直接写在行里（0.7.38-M6 / 59）。
+         锁屏仍用「宽松判定」，新通知这行改用「仅横幅通知」，两行不要共用同一个前缀。 -->
     <string name="settings_trigger_summary_on">开</string>
     <string name="settings_trigger_summary_off">关</string>
     <string name="settings_trigger_summary">宽松判定-%1$s•%2$s</string>
+    <string name="settings_trigger_new_summary">仅横幅通知-%1$s•%2$s</string>
     <string name="settings_trigger_banner_always">输入时一律拉起activity</string>
     <string name="settings_trigger_banner_defer">延迟拉起activity</string>
     <string name="settings_trigger_banner_never">一律不拉起activity</string>
@@ -219,24 +221,29 @@
     <string name="settings_trigger_live_normal">实时通知预热-中等</string>
     <string name="settings_trigger_live_wide">实时通知预热-宽松</string>
 
-    <!-- 横幅触发高级设置（弹窗） -->
-    <string name="settings_banner_advanced_title">横幅触发高级设置</string>
-    <string name="settings_banner_loose_title">横幅宽松判定</string>
-    <string name="settings_banner_loose_desc">若存在弹出横幅通知未触发预热的情况，请尝试此功能，开启后会将所有新通知都判定为横幅通知</string>
+    <!-- 新通知触发高级设置（弹窗） -->
+    <string name="settings_banner_advanced_title">新通知触发高级设置</string>
+    <string name="settings_banner_loose_title">仅横幅通知触发</string>
+    <string name="settings_banner_loose_desc">开启后会尝试识别横幅通知，但可能存在识别不准确的情况。</string>
     <string name="settings_banner_act_title">输入时拉起activity行为</string>
-    <string name="settings_banner_act_desc">当正在输入时收到横幅通知，触发拉起activity方式预热时，可能会导致输入框失焦、输入法缩回，若存在该情况，请选择延迟触发或不触发。唤醒后台预热方式不受影响。</string>
+    <string name="settings_banner_act_desc">当正在输入时收到新通知，触发拉起activity方式预热时，可能会导致输入框失焦、输入法缩回，若存在该情况，请选择延迟触发或不触发。唤醒后台预热方式不受影响。</string>
     <string name="settings_banner_act_never">一律不拉起activity</string>
     <string name="settings_banner_act_defer">待输入法收回后拉起activity</string>
     <string name="settings_banner_act_always">一律拉起activity</string>
     <string name="settings_ime_poll_hint">延迟轮询检测间隔（毫秒）</string>
     <string name="settings_ime_poll_helper">输入法收回只能靠轮询判断；可选 100–2000，默认 300。</string>
     <string name="settings_ime_defer_hint">最长延迟时间（毫秒）</string>
-    <string name="settings_ime_defer_helper">超过这个时间就视为横幅已缩回，不再轮询；可选 1000–20000，默认 10000。</string>
+    <string name="settings_ime_defer_helper">超过这个时间就放弃这次拉起，不再轮询；可选 1000–20000，默认 10000。</string>
 
     <!-- 锁屏触发高级设置（弹窗） -->
     <string name="settings_lockscreen_advanced_title">锁屏触发高级设置</string>
-    <string name="settings_lockscreen_loose_title">锁屏普通通知宽松判定</string>
-    <string name="settings_lockscreen_loose_desc">默认尝试精确匹配锁屏显示的通知并预热，若存在漏预热的情况，请尝试此功能，开启后锁屏状态也会直接预热通知中心内所有通知对应的应用。ColorOS 的锁屏岛无法精确判定内容，若使用锁屏岛请打开此开关。</string>
+    <string name="settings_fast_warm_title">息屏时尝试记录新锁屏通知，点亮屏幕快速预热</string>
+    <string name="settings_fast_warm_desc">快速预热可能存在偏差。关闭后会在亮屏大概400ms后预热，但能够做到更精确的预热。</string>
+    <string name="settings_fast_warm_precision_title">息屏状态识别锁屏通过滤精确度</string>
+    <string name="settings_fast_warm_precision_value">%1$d%%</string>
+    <string name="settings_fast_warm_precision_desc">精确度过低会将不在锁屏显示的通知也快速预热，精确度过高可能会漏预热，请自行调节测试。</string>
+    <string name="settings_lockscreen_loose_title">亮屏后通知宽松判定</string>
+    <string name="settings_lockscreen_loose_desc">默认尝试精确匹配锁屏显示的通知并预热，若存在漏预热的情况，可尝试此功能，开启后锁屏状态也会直接预热通知中心内所有通知对应的应用。ColorOS 的锁屏岛无法精确判定内容，若使用锁屏岛请打开此开关。</string>
     <string name="settings_live_warm_title">实时通知（流体云）预热</string>
     <string name="settings_live_warm_desc">开启后会尝试预热实时通知（流体云）对应的应用</string>
     <string name="settings_live_range_label">判定范围</string>

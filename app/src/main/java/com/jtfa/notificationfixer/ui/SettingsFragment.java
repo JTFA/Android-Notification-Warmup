@@ -512,8 +512,9 @@ public class SettingsFragment extends Fragment {
         } else {
             activityPart = getString(R.string.settings_trigger_banner_defer);
         }
-        mTextBannerSummary.setText(getString(R.string.settings_trigger_summary,
-                Prefs.getBannerMode() == Prefs.MODE_LOOSE ? on : off, activityPart));
+        // 新通知这行写的是「仅横幅通知」是否开启：勾选 = 严格档 = 开。
+        mTextBannerSummary.setText(getString(R.string.settings_trigger_new_summary,
+                Prefs.getBannerMode() == Prefs.MODE_STRICT ? on : off, activityPart));
 
         String livePart;
         int live = Prefs.getLiveWarmMode();
@@ -531,7 +532,7 @@ public class SettingsFragment extends Fragment {
     }
 
     /**
-     * 「横幅触发高级设置」弹窗（0.7.38-M6 / 59）。
+     * 「新通知触发高级设置」弹窗（0.7.38-M6 / 59）。
      *
      * <p>即改即生效，只有一个「关闭」：这一页本来就是这个风格（开关与单选都是当场落库）。弹窗里改过
      * 之后，下面那行小字也跟着换说法。
@@ -540,15 +541,16 @@ public class SettingsFragment extends Fragment {
         Context context = requireContext();
         View body = LayoutInflater.from(context)
                 .inflate(R.layout.dialog_banner_advanced, null, false);
-        MaterialSwitch loose = body.findViewById(R.id.dlg_sw_banner_loose);
+        MaterialSwitch onlyBanner = body.findViewById(R.id.dlg_sw_banner_loose);
         RadioGroup activity = body.findViewById(R.id.dlg_rg_banner_act);
         TextInputLayout tilPoll = body.findViewById(R.id.dlg_til_ime_poll);
         TextInputEditText editPoll = body.findViewById(R.id.dlg_et_ime_poll);
         TextInputLayout tilDefer = body.findViewById(R.id.dlg_til_ime_defer);
         TextInputEditText editDefer = body.findViewById(R.id.dlg_et_ime_defer);
 
-        // 先把现值摆上、再挂监听：不然「摆值」会被当成用户操作
-        loose.setChecked(Prefs.getBannerMode() == Prefs.MODE_LOOSE);
+        // 先把现值摆上、再挂监听：不然「摆值」会被当成用户操作。
+        // 开关语义：勾选 = 只认横幅（严格档），取消 = 所有新通知（宽松档）。
+        onlyBanner.setChecked(Prefs.getBannerMode() == Prefs.MODE_STRICT);
         int activityMode = Prefs.getBannerActivityMode();
         activity.check(activityMode == Prefs.BANNER_ACTIVITY_NEVER
                 ? R.id.dlg_rb_act_never
@@ -559,8 +561,8 @@ public class SettingsFragment extends Fragment {
         editDefer.setText(String.valueOf(Prefs.getImeDeferMaxMs()));
         applyImeFieldsEnabled(tilPoll, editPoll, tilDefer, editDefer);
 
-        loose.setOnCheckedChangeListener((view, checked) -> {
-            Prefs.setBannerMode(checked ? Prefs.MODE_LOOSE : Prefs.MODE_STRICT);
+        onlyBanner.setOnCheckedChangeListener((view, checked) -> {
+            Prefs.setBannerMode(checked ? Prefs.MODE_STRICT : Prefs.MODE_LOOSE);
             updateTriggerSummaries();
         });
         activity.setOnCheckedChangeListener((group, checkedId) -> {
@@ -601,13 +603,18 @@ public class SettingsFragment extends Fragment {
     /**
      * 「锁屏触发高级设置」弹窗（0.7.38-M6 / 59）。
      *
-     * <p>两块：普通通知的宽松判定，实时通知（流体云）预热的开关 + 复看范围三档。实时通知那一块只对
-     * 「锁屏点亮时」这条触发点生效（值本来就是这个用途），所以它跟着这里的开关走。
+     * <p>三块：息屏记录 + 亮屏快速预热（开关 + 10 档精确度滑杆），亮屏后通知宽松判定，实时通知
+     * （流体云）预热的开关 + 复看范围三档。后两块只对「锁屏点亮时」这条触发点生效；快速预热
+     * 还额外受自己的开关控制，关掉后不再记录息屏通知，但 400ms 的锁屏探测不受影响。
      */
     private void showLockscreenAdvancedDialog() {
         Context context = requireContext();
         View body = LayoutInflater.from(context)
                 .inflate(R.layout.dialog_lockscreen_advanced, null, false);
+        MaterialSwitch fastWarm = body.findViewById(R.id.dlg_sw_fast_warm);
+        View precisionBlock = body.findViewById(R.id.dlg_ll_fast_warm_precision);
+        Slider precisionSlider = body.findViewById(R.id.dlg_slider_fast_warm_precision);
+        TextView precisionValue = body.findViewById(R.id.dlg_tv_fast_warm_precision_value);
         MaterialSwitch loose = body.findViewById(R.id.dlg_sw_lockscreen_loose);
         MaterialSwitch live = body.findViewById(R.id.dlg_sw_live_warm);
         View rangeBlock = body.findViewById(R.id.dlg_ll_live_range);
@@ -616,6 +623,12 @@ public class SettingsFragment extends Fragment {
         TextView labelNormal = body.findViewById(R.id.dlg_tv_live_normal);
         TextView labelWide = body.findViewById(R.id.dlg_tv_live_wide);
 
+        fastWarm.setChecked(Prefs.isScreenOffFastWarm());
+        precisionSlider.setValue(Prefs.getLockscreenFilterPrecision());
+        precisionValue.setText(getString(R.string.settings_fast_warm_precision_value,
+                (int) precisionSlider.getValue()));
+        precisionBlock.setVisibility(fastWarm.isChecked() ? View.VISIBLE : View.GONE);
+
         loose.setChecked(Prefs.getLockscreenMode() == Prefs.LOCKSCREEN_MODE_LEGACY);
         int mode = Prefs.getLiveWarmMode();
         live.setChecked(mode != Prefs.LIVE_WARM_OFF);
@@ -623,6 +636,15 @@ public class SettingsFragment extends Fragment {
         rangeBlock.setVisibility(live.isChecked() ? View.VISIBLE : View.GONE);
         tintLiveRangeLabels(labelStrict, labelNormal, labelWide, (int) slider.getValue());
 
+        fastWarm.setOnCheckedChangeListener((view, checked) -> {
+            Prefs.setScreenOffFastWarm(checked);
+            precisionBlock.setVisibility(checked ? View.VISIBLE : View.GONE);
+        });
+        precisionSlider.addOnChangeListener((view, value, fromUser) -> {
+            Prefs.setLockscreenFilterPrecision((int) value);
+            precisionValue.setText(getString(R.string.settings_fast_warm_precision_value,
+                    (int) value));
+        });
         loose.setOnCheckedChangeListener((view, checked) -> {
             Prefs.setLockscreenMode(checked
                     ? Prefs.LOCKSCREEN_MODE_LEGACY

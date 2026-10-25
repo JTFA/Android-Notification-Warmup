@@ -2,11 +2,14 @@
 <!--
   「锁屏触发高级设置」弹窗（0.7.38-M6 / 59）。
 
-  两块，中间一条分割线：① 锁屏普通通知宽松判定（开关）；② 实时通知（流体云）预热（开关 + 三档
-  「判定范围」）。即改即生效 —— 这里没有「确定」，点「关闭」只是把弹窗关掉。
+  三块，中间用分割线隔开：① 息屏记录 + 亮屏快速预热（开关 + 精确度滑杆）；② 亮屏后通知宽松
+  判定（开关）；③ 实时通知（流体云）预热（开关 + 三档「判定范围」）。即改即生效 —— 这里没有
+  「确定」，点「关闭」只是把弹窗关掉。
 
-  三档用 Material Slider（0 / 1 / 2 三档，刻度可见、不弹数字气泡），下面三个标签里选中的那个用主色
-  （代码里刷）；开关关掉时整块隐藏。
+  精确度滑杆是 0–100 的 10 档（步长 10），不显示刻度与数字气泡，右侧小字显示当前值；
+  开关关掉时整块隐藏。
+  实时通知的三档用 Material Slider（0 / 1 / 2 三档，刻度可见、不弹数字气泡），下面三个标签里
+  选中的那个用主色（代码里刷）；开关关掉时整块隐藏。
 -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -22,7 +25,99 @@
         android:paddingEnd="24dp"
         android:paddingBottom="8dp">
 
-        <!-- ① 锁屏普通通知宽松判定 -->
+        <!-- ① 息屏记录 + 亮屏快速预热 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_fast_warm_title"
+                    android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/settings_fast_warm_desc"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+            </LinearLayout>
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/dlg_sw_fast_warm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:contentDescription="@string/settings_fast_warm_title" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/dlg_ll_fast_warm_precision"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/settings_fast_warm_precision_title"
+                    android:textAppearance="?attr/textAppearanceLabelLarge" />
+
+                <TextView
+                    android:id="@+id/dlg_tv_fast_warm_precision_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+            </LinearLayout>
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/dlg_slider_fast_warm_precision"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:stepSize="10"
+                android:value="40"
+                android:valueFrom="0"
+                android:valueTo="100"
+                app:labelBehavior="gone"
+                app:tickVisible="false" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/settings_fast_warm_precision_desc"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+        </LinearLayout>
+
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- ② 亮屏后通知宽松判定 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -64,7 +159,7 @@
             android:layout_marginTop="12dp"
             android:layout_marginBottom="12dp" />
 
-        <!-- ② 实时通知（流体云）预热 -->
+        <!-- ③ 实时通知（流体云）预热 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

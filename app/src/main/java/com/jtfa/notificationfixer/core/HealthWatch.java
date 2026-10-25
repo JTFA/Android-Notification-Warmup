@@ -17,7 +17,7 @@ import java.util.List;
  * <b>什么算异常</b>。四类异常、四枚开关（{@link Prefs#isWatchListener()} 等）：
  *
  * <ul>
- *   <li>通知监听：没授通知使用权，或授了但监听器没接上 —— 横幅触发点直接失效；</li>
+ *   <li>通知监听：没授通知使用权，或授了但监听器没接上 —— 新通知触发点直接失效；</li>
  *   <li>无障碍：<b>见过它开着</b>（{@link Prefs#isAccessibilityEverOn()}，我们见到「开着」时记一笔、
  *       见「关着」不会把它翻回去）、现在系统里是关的 —— 面板 / 锁屏触发点失效。从没开启过的用户
  *       不算异常（那是还没配，不是掉了），与 {@code AccessibilityAutostart} 的界线一致；</li>

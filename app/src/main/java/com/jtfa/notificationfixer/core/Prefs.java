@@ -27,7 +27,9 @@ public final class Prefs {
     private static final String KEY_TRIGGER_BANNER = "trigger_banner";
     private static final String KEY_TRIGGER_SHADE = "trigger_shade";
     private static final String KEY_TRIGGER_LOCKSCREEN = "trigger_lockscreen";
+    private static final String KEY_SCREEN_OFF_FAST_WARM = "screen_off_fast_warm";
     private static final String KEY_LOCKSCREEN_MODE = "lockscreen_mode";
+    private static final String KEY_LOCKSCREEN_FILTER_PRECISION = "lockscreen_filter_precision";
     private static final String KEY_LIVE_WARM_MODE = "live_warm_mode";
     private static final String KEY_BANNER_MODE = "banner_mode";
     private static final String KEY_BANNER_ACTIVITY_MODE = "banner_activity_mode";
@@ -81,21 +83,21 @@ public final class Prefs {
     /** 通知来源记录的上限，防止长期使用无限增长。 */
     private static final int MAX_NOTIFIED = 400;
 
-    /** 横幅判定：有效重要度（系统排名表给的那份）必须为「高」及以上。 */
+    /** 「仅横幅通知触发」：有效重要度（系统排名表给的那份）必须为「高」及以上。 */
     public static final int MODE_STRICT = 0;
 
-    /** 横幅判定：任意非重复的新通知。 */
+    /** 「仅横幅通知触发」关闭：任意非重复的新通知。 */
     public static final int MODE_LOOSE = 1;
 
     /**
-     * 横幅触发时，「拉起 Activity」那一路怎么办（0.7.30-M6 / 51）。
+     * 全局新通知触发时，「拉起 Activity」那一路怎么办（0.7.30-M6 / 51）。
      *
      * <p>只有被设成「拉起 Activity」的应用受影响；另外三条路（Provider / Service / 广播）不启动
      * 界面组件，不抢焦点，所以任何时候都不受这三个档位影响。面板与锁屏两个触发点也不受影响
-     * （那两件事发生时输入法本来就是收起的），闸门只装在横幅上。
+     * （那两件事发生时输入法本来就是收起的），闸门只装在全局新通知上。
      */
 
-    /** 一律不拉起：横幅下这条路整条不上场（这一类应用在横幅场景里等于不预热）。 */
+    /** 一律不拉起：全局新通知下这条路整条不上场（这一类应用在新通知场景里等于不预热）。 */
     public static final int BANNER_ACTIVITY_NEVER = 0;
 
     /** 输入法可见时不拉起：等输入法收起再拉，最多等 {@link #getImeDeferMaxMs()}（默认档）。 */
@@ -113,6 +115,18 @@ public final class Prefs {
     public static final int IME_DEFER_MAX_MS_DEFAULT = 10_000;
     public static final int IME_DEFER_MAX_MS_MIN = 1_000;
     public static final int IME_DEFER_MAX_MS_MAX = 20_000;
+
+    /**
+     * 息屏记录 + 亮屏快速预热的锁屏可见性过滤精确度。
+     *
+     * <p>0 = 最宽松（息屏期间所有新通知都算可能上锁屏）；100 = 最严格（只算强证据，
+     * 例如 PUBLIC 可见性、全屏 Intent）。到达时先算置信度，亮屏时再按当时的这个值过滤，
+     * 所以息屏期间拖动滑杆也会在本次亮屏生效。界面只提供 10 分一档，存取值也按 10 对齐。
+     */
+    public static final int LOCKSCREEN_FILTER_PRECISION_DEFAULT = 40;
+    public static final int LOCKSCREEN_FILTER_PRECISION_MIN = 0;
+    public static final int LOCKSCREEN_FILTER_PRECISION_MAX = 100;
+    public static final int LOCKSCREEN_FILTER_PRECISION_STEP = 10;
 
     /** 名单模式：黑名单（预热所有应用；被勾选的除外）。 */
     public static final int LIST_MODE_BLACKLIST = 0;
@@ -223,6 +237,42 @@ public final class Prefs {
     }
 
     /**
+     * 息屏时记录新通知、亮屏瞬间快速预热。
+     *
+     * <p>默认开启，保持升级前的行为。关掉后不再记录息屏通知，也不发
+     * {@code SCREEN_ON_PENDING}；400ms 后的锁屏精确探测不受影响。
+     */
+    public static boolean isScreenOffFastWarm() {
+        return store().getBoolean(KEY_SCREEN_OFF_FAST_WARM, true);
+    }
+
+    public static void setScreenOffFastWarm(boolean enabled) {
+        store().edit().putBoolean(KEY_SCREEN_OFF_FAST_WARM, enabled).apply();
+        notifyChanged();
+    }
+
+    /** 锁屏可见性过滤精确度：越低越宽松，越高越严格。 */
+    public static int getLockscreenFilterPrecision() {
+        return clampLockscreenFilterPrecision(store().getInt(
+                KEY_LOCKSCREEN_FILTER_PRECISION, LOCKSCREEN_FILTER_PRECISION_DEFAULT));
+    }
+
+    public static void setLockscreenFilterPrecision(int precision) {
+        store().edit().putInt(KEY_LOCKSCREEN_FILTER_PRECISION,
+                clampLockscreenFilterPrecision(precision)).apply();
+        notifyChanged();
+    }
+
+    public static int clampLockscreenFilterPrecision(int precision) {
+        int clamped = Math.max(LOCKSCREEN_FILTER_PRECISION_MIN,
+                Math.min(precision, LOCKSCREEN_FILTER_PRECISION_MAX));
+        int stepped = Math.round(clamped / (float) LOCKSCREEN_FILTER_PRECISION_STEP)
+                * LOCKSCREEN_FILTER_PRECISION_STEP;
+        return Math.max(LOCKSCREEN_FILTER_PRECISION_MIN,
+                Math.min(stepped, LOCKSCREEN_FILTER_PRECISION_MAX));
+    }
+
+    /**
      * 锁屏点亮这条触发点怎么挑候选应用（0.7.34-M6 / 55）。
      *
      * <p>两档的差别只有一件事：<b>要不要相信锁屏上真正画出来的那几行</b>。
@@ -313,7 +363,7 @@ public final class Prefs {
     }
 
     /**
-     * 横幅触发时「拉起 Activity」这一路的三档（见 {@link #BANNER_ACTIVITY_NEVER} 等）。
+     * 全局新通知触发时「拉起 Activity」这一路的三档（见 {@link #BANNER_ACTIVITY_NEVER} 等）。
      *
      * <p>读到的脏数据一律收回默认档，不让界面与引擎各自解释一个没定义的值。
      */

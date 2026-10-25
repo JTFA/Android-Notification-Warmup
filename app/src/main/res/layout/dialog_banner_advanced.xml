@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  「横幅触发高级设置」弹窗（0.7.38-M6 / 59）。
+  「新通知触发高级设置」弹窗（0.7.38-M6 / 59）。
 
-  三块，块与块之间一条分割线：① 横幅宽松判定（开关）；② 输入时拉起 activity 的行为（三选一）；
-  ③ 两个数值框。即改即生效 —— 这里没有「确定」，点「关闭」只是把弹窗关掉。
+  三块，块与块之间一条分割线：① 仅横幅通知触发（开关，勾选 = 只认横幅）；② 输入时拉起
+  activity 的行为（三选一）；③ 两个数值框。即改即生效 —— 这里没有「确定」，点「关闭」只是把弹窗关掉。
 
   数值框沿用原来的规矩：只有选「待输入法收回后拉起 activity」时可以编辑（代码里控制）。
 -->
@@ -21,7 +21,7 @@
         android:paddingEnd="24dp"
         android:paddingBottom="8dp">
 
-        <!-- ① 横幅宽松判定 -->
+        <!-- ① 仅横幅通知触发 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

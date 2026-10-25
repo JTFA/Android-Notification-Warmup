@@ -12,6 +12,7 @@ import com.jtfa.notificationfixer.core.EventLog;
 import com.jtfa.notificationfixer.core.ForegroundAppTracker;
 import com.jtfa.notificationfixer.core.Prefs;
 import com.jtfa.notificationfixer.detect.ImeWatch;
+import com.jtfa.notificationfixer.detect.ScreenStateReceiver;
 import com.jtfa.notificationfixer.detect.TriggerBus;
 import com.jtfa.notificationfixer.detect.TriggerEvent;
 import com.jtfa.notificationfixer.detect.TriggerType;
@@ -41,11 +42,11 @@ import java.util.Map;
  *       这里用「冷却 + 幂等预热」代替状态查询 —— 进程已存活时预热只是一次几毫秒的调用。
  *       有特权通道时（M4）改为在预热前后各探活一次（`pidof`）：先把「进程是不是这次拉起来的」
  *       变成日志里的证据，之后再考虑用它替掉这套近似判断。</li>
- *   <li><b>优先级抢占。</b>优先级 锁屏 &gt; 横幅 &gt; 面板。更高优先级到来时，
+ *   <li><b>优先级抢占。</b>优先级 锁屏 &gt; 新通知 &gt; 面板。更高优先级到来时，
  *       还没执行的较低优先级任务会被丢掉，避免先跑去服务已经过时的场景。</li>
  *   <li><b>执行前再确认。</b>真正开跑之前检查目标是否已经在前台，是就跳过 ——
  *       用户已经点开通知了，不需要再预热。</li>
- *   <li><b>打字时不抢焦点（0.7.30-M6 / 51）。</b>横幅到达时，如果这个应用走的是「拉起 Activity」
+ *   <li><b>打字时不抢焦点（0.7.30-M6 / 51）。</b>全局新通知到达时，如果这个应用走的是「拉起 Activity」
  *       那一路、而且现在有输入法窗口可见，就按设置延后到输入法收起（最多等到用户设的上限）、
  *       或者干脆不拉。只有这一个组合需要这道闸门：另外三条路不启动界面组件，面板与锁屏发生时
  *       输入法本来就是收起的。见 {@link #holdForIme}。</li>
@@ -77,13 +78,21 @@ public final class WarmEngine implements TriggerBus.Listener {
      */
     public static final long AFTER_PROBE_DELAY_MS = 1_500L;
 
+    /**
+     * 亮屏补预热的复探延迟（5 秒）。
+     *
+     * <p>亮屏瞬间用户往往正在点锁屏通知；这时再跑 {@code pidof} 会和启动动画抢 CPU。
+     * 推迟到 5 秒后只影响取证，不影响预热本身；手动测试仍按 1.5 秒。
+     */
+    public static final long AFTER_PROBE_DELAY_SCREEN_ON_MS = 5_000L;
+
     /** 面板场景的延迟：留出用户找通知的时间。个数上限见 {@code Prefs.getWarmMaxApps()}。 */
     public static final long SHADE_DELAY_MS = 200L;
 
     /** 锁屏场景已经在屏幕点亮后等过 400ms，这里不再延迟。 */
     public static final long LOCKSCREEN_DELAY_MS = 0L;
 
-    /** 横幅场景立刻执行；候选永远只有发通知的那一个应用，所以数量上限对它没有影响。 */
+    /** 全局新通知场景立刻执行；候选永远只有发通知的那一个应用，所以数量上限对它没有影响。 */
     public static final long BANNER_DELAY_MS = 0L;
 
     private static final int PRIORITY_SHADE = 1;
@@ -242,6 +251,18 @@ public final class WarmEngine implements TriggerBus.Listener {
                     "总开关已关闭，忽略 " + event.type.label());
             return;
         }
+        if (event.type == TriggerType.SCREEN_ON_PENDING
+                && (!Prefs.isTriggerLockscreen() || !Prefs.isScreenOffFastWarm())) {
+            // 开关可能在排队后、执行前被关掉；这里再兜一次，保证关掉就是完全没有快速预热。
+            EventLog.get().log(EventLog.CAT_WARM,
+                    "锁屏点亮或亮屏补预热开关已关闭，忽略");
+            return;
+        }
+        if (!ScreenStateReceiver.isScreenOn()) {
+            EventLog.get().log(EventLog.CAT_WARM,
+                    "屏幕未点亮，忽略 " + event.type.label());
+            return;
+        }
 
         final int priority;
         final long delayMs;
@@ -254,12 +275,14 @@ public final class WarmEngine implements TriggerBus.Listener {
                 break;
             case LOCKSCREEN_LIT:
             case LOCKSCREEN_NOTIFICATION:
-                // 锁屏停留时的新通知与锁屏点亮使用同一档优先级和延迟。
+            case SCREEN_ON_PENDING:
+                // 锁屏停留时的新通知、锁屏点亮、亮屏补预热使用同一档优先级和延迟。
                 priority = PRIORITY_LOCKSCREEN;
                 delayMs = LOCKSCREEN_DELAY_MS;
                 break;
             case BANNER_NOTIFICATION:
             default:
+                // 全局新通知：内层开时只认横幅，内层关时是所有新通知。
                 priority = PRIORITY_BANNER;
                 delayMs = BANNER_DELAY_MS;
                 break;
@@ -543,6 +566,11 @@ public final class WarmEngine implements TriggerBus.Listener {
                 publish(WarmResult.skipped(task.packageName, "总开关已关闭"), task);
                 return;
             }
+            // 触发时亮屏、排到执行时已经熄屏：不再执行。锁屏探测等延迟任务也走这里。
+            if (!ScreenStateReceiver.isScreenOn()) {
+                publish(WarmResult.skipped(task.packageName, "屏幕未点亮"), task);
+                return;
+            }
             if (task.packageName.equals(ForegroundAppTracker.get())) {
                 publish(WarmResult.skipped(task.packageName, "目标已在前台"), task);
                 return;
@@ -631,22 +659,25 @@ public final class WarmEngine implements TriggerBus.Listener {
                 }
             }
         } else if (evidence) {
-            // 自动路径：绝不为了取证拖住队列，复探交给特权线程延迟做
+            // 自动路径：绝不为了取证拖住队列，复探交给特权线程延迟做。
+            // 亮屏补预热推迟到 5 秒，避开用户点通知时的启动动画；其它触发仍是 1.5 秒。
+            long afterProbeDelay = task.trigger == TriggerType.SCREEN_ON_PENDING
+                    ? AFTER_PROBE_DELAY_SCREEN_ON_MS : AFTER_PROBE_DELAY_MS;
             ProcessProbe.scheduleAfterProbe(task.packageName, before,
-                    result.describe(), AFTER_PROBE_DELAY_MS);
+                    result.describe(), afterProbeDelay);
         }
 
         publish(result, task);
     }
 
     /**
-     * 横幅 + 「拉起 Activity」这一路的输入法闸门（0.7.30-M6 / 51）。
+     * 全局新通知 + 「拉起 Activity」这一路的输入法闸门（0.7.30-M6 / 51）。
      *
-     * <p>为什么只有这一个组合：只有横幅会在用户可能正在打字的时候到达，也只有「拉起 Activity」
+     * <p>为什么只有这一个组合：只有新通知会在用户可能正在打字的时候到达，也只有「拉起 Activity」
      * 这条路会启动界面组件、把焦点抢走。面板与锁屏不设闸 —— 那两件事发生时输入法本来就是收起的；
      * 手动按钮（「试一次」/ 名单页每行的「打开」）也不设闸 —— 那是用户点名要看结果的实验。
      *
-     * <p>三个档位见 {@code Prefs.BANNER_ACTIVITY_*}：一律不拉起（横幅下这条路整个不上场，与输入法
+     * <p>三个档位见 {@code Prefs.BANNER_ACTIVITY_*}：一律不拉起（全局新通知下这条路整个不上场，与输入法
      * 读数无关）/ 输入法可见时不拉起（默认，等它收起、最多等到用户设的上限）/ 一律拉起（0.7.29 及
      * 以前的行为）。最后一档之外的读数读不到（无障碍没连上）时按<b>原行为</b>处理：照拉，并且在日志里
      * 写「未知」—— 绝不因为读不到就悄悄改成不拉。

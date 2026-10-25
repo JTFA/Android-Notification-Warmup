@@ -85,6 +85,24 @@ public class ShadeAccessibilityService extends AccessibilityService {
         return service != null && service.mShadeOpen;
     }
 
+    /**
+     * 熄屏时作废面板状态。
+     *
+     * <p>锁屏窗口与下拉面板都用 {@code notification_stack_scroller} 这个列表容器；
+     * 熄屏前若面板被判定为展开，下一次亮屏（尤其是直接进锁屏）可能沿用旧状态。
+     * 这里只把状态复位，真正的窗口读数由下一次 systemui 事件重新建立。
+     */
+    public static void resetShadeState() {
+        ShadeAccessibilityService service = sInstance;
+        if (service == null || !service.mShadeOpen) {
+            return;
+        }
+        service.mShadeOpen = false;
+        if (Prefs.isDiagLog()) {
+            EventLog.get().log(EventLog.CAT_DIAG, "屏幕熄灭，面板状态复位为收起");
+        }
+    }
+
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
@@ -186,9 +204,18 @@ public class ShadeAccessibilityService extends AccessibilityService {
     }
 
     private void evaluateShade(long now) {
+        if (!ScreenStateReceiver.isScreenOn()) {
+            mShadeOpen = false;
+            return;
+        }
+
         boolean open = false;
         String rule = "未命中";
         StringBuilder signature = new StringBuilder();
+        // 锁屏窗口的标题在真机上是空串，下拉面板的标题是 NotificationShade。两者都可能
+        // 挂 notification_stack_scroller，锁屏时只认有标题的那个窗口，避免把锁屏通知
+        // 当成「通知中心新通知」。
+        boolean keyguardLocked = ScreenStateReceiver.isLocked(this);
 
         try {
             List<AccessibilityWindowInfo> windows = getWindows();
@@ -204,13 +231,21 @@ public class ShadeAccessibilityService extends AccessibilityService {
                 if (packageName == null || !SYSTEM_UI.contentEquals(packageName)) {
                     continue;
                 }
+                int windowType = window.getType();
                 CharSequence titleSequence = window.getTitle();
                 String title = titleSequence == null ? "" : titleSequence.toString();
                 signature.append('{')
-                        .append(windowTypeName(window.getType()))
+                        .append(windowTypeName(windowType))
                         .append(' ').append(title)
                         .append(" / ").append(root.getClassName())
                         .append('}');
+
+                // 锁屏窗口也是 systemui，里面也有 notification_stack_scroller。它属于
+                // 「锁屏点亮时」那条触发点，不是下拉面板；不排除的话，亮屏锁屏的新通知
+                // 会被记成「通知中心新通知」。
+                if (keyguardLocked && title.isEmpty()) {
+                    continue;
+                }
 
                 if (!open) {
                     for (String id : SHADE_VIEW_IDS) {
@@ -248,11 +283,11 @@ public class ShadeAccessibilityService extends AccessibilityService {
                 if (Prefs.isDiagLog()) {
                     EventLog.get().log(EventLog.CAT_DIAG, "面板状态 → 展开（规则：" + rule + "）");
                 }
-                if (Prefs.isTriggerShade()) {
+                if (Prefs.isTriggerShade() && ScreenStateReceiver.isScreenOn()) {
                     List<String> targets = NotificationTargets.visibleInShade(this);
                     if (targets.isEmpty()) {
                         EventLog.get().log(EventLog.CAT_DIAG, "面板已展开，但面板里没有可预热的通知");
-                    } else {
+                    } else if (ScreenStateReceiver.isScreenOn()) {
                         TriggerBus.emit(new TriggerEvent(
                                 TriggerType.SHADE_OPENED, SYSTEM_UI, rule, targets));
                     }
